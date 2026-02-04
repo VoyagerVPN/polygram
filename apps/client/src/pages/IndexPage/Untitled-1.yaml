@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Polygram Markets - Prediction Platform</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3289ec",
+                        "background-dark": "#0B0E11",
+                        "card-dark": "#1c2631",
+                        "surface-dark": "#161C26",
+                        "border-dark": "#232A35",
+                        "success": "#0bda5e",
+                        "danger": "#ff4b4b",
+                        "muted": "#64748b",
+                        "gold": "#FACC15",
+                        "silver": "#94A3B8",
+                        "bronze": "#A8A29E"
+                    },
+                    fontFamily: {
+                        "sans": ["Inter", "sans-serif"],
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.25rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .glass-card {
+                @apply bg-slate-800/40 backdrop-blur-md border border-slate-700/50;
+            }
+            .nav-blur {
+                @apply bg-background-dark/95 backdrop-blur-xl border-t border-white/5;
+            }
+            .header-blur {
+                @apply bg-background-dark/95 backdrop-blur-xl border-b border-white/5;
+            }
+            .flat-panel {
+                @apply bg-[#1c2631] border border-white/5;
+            }
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .flat-card {
+                @apply bg-[#161b22] border border-[#21262d];
+            }
+        }
+        body {
+            @apply bg-background-dark text-slate-200 font-sans antialiased;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 100dvh;
+        }
+    </style>
+
+    <!-- Load React and Router -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/history@5/umd/history.development.js"></script>
+    <script src="https://unpkg.com/react-router@6.3.0/umd/react-router.development.js"></script>
+    <script src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="dark">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { createRoot } = ReactDOM;
+        const { MemoryRouter, Routes, Route, Link, useNavigate, useLocation } = ReactRouterDOM;
+
+        // --- Common Components ---
+
+        const BottomNav = ({ active }) => {
+            const navItems = [
+                { id: 'markets', icon: 'analytics', label: 'Markets', path: '/' },
+                { id: 'leaderboard', icon: 'emoji_events', label: 'Top', path: '/leaderboard' },
+                { id: 'portfolio', icon: 'account_balance_wallet', label: 'Portfolio', path: '/portfolio' },
+                { id: 'menu', icon: 'menu', label: 'Menu', path: '/menu' }
+            ];
+
+            return (
+                <nav className="fixed bottom-0 left-0 right-0 z-[60] nav-blur pb-8 pt-2">
+                    <div className="max-w-md mx-auto flex justify-around items-center px-4">
+                        {navItems.map(item => (
+                            <Link 
+                                key={item.id}
+                                to={item.path} 
+                                className={`flex flex-col items-center gap-1 ${active === item.id ? 'text-primary' : 'text-slate-500'}`}
+                            >
+                                <span className={`material-symbols-outlined text-[24px] ${active === item.id ? 'font-variation-fill' : ''}`}>
+                                    {item.icon}
+                                </span>
+                                <span className="text-[10px] font-semibold">{item.label}</span>
+                            </Link>
+                        ))}
+                    </div>
+                </nav>
+            );
+        };
+
+        const Header = ({ title = "Polygram", showBack = false }) => {
+            const navigate = useNavigate();
+            return (
+                <header className="sticky top-0 z-50 header-blur px-4 py-3">
+                    <div className="flex items-center justify-between max-w-md mx-auto">
+                        <div className="flex items-center gap-2.5">
+                            {showBack ? (
+                                <button onClick={() => navigate(-1)} className="flex items-center justify-center -ml-2 p-1 active:opacity-60">
+                                    <span className="material-symbols-outlined text-[28px]">chevron_left</span>
+                                </button>
+                            ) : (
+                                <div className="bg-primary/10 p-1.5 rounded-lg border border-primary/20">
+                                    <span className="material-symbols-outlined text-primary text-[22px] block">query_stats</span>
+                                </div>
+                            )}
+                            <h1 className="text-base font-semibold tracking-tight">{title}</h1>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <div className="bg-card-dark border border-border-dark rounded-full px-3 py-1 flex items-center gap-1.5">
+                                <span className="material-symbols-outlined text-[16px] text-primary">account_balance_wallet</span>
+                                <span className="text-xs font-bold">2,450 TON</span>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            );
+        };
+
+        // --- Screen 1: Home/Markets ---
+
+        const HomePage = () => {
+            const navigate = useNavigate();
+            return (
+                <div className="pb-24">
+                    <Header showProfile={true} />
+                    <div className="w-full overflow-x-auto py-4 px-4 no-scrollbar">
+                        <div className="flex gap-2 max-w-md mx-auto">
+                            <button className="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-slate-100 px-5 text-slate-900 text-sm font-semibold">Trending</button>
+                            <button className="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-slate-800 border border-slate-700 px-5 text-slate-400 text-sm font-medium">Closing Soon</button>
+                            <button className="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-slate-800 border border-slate-700 px-5 text-slate-400 text-sm font-medium">High Volume</button>
+                        </div>
+                    </div>
+                    <main className="px-4 space-y-4 max-w-md mx-auto">
+                        <div 
+                            className="glass-card rounded-xl overflow-hidden cursor-pointer"
+                            onClick={() => navigate('/market/eth-5000')}
+                        >
+                            <div className="relative w-full aspect-[21/9] bg-cover bg-center" style={{backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCq1EFErZCdGiXayfD8xmh-Ou2srugx-VGDtphFgUlccEJa5opB1YWZmxW6pZuzd7rNI6UZozsmrfoIwjR6BKHwkKaFodBfPOGPnpsxEJGWglE_RDwPo7g6sh3ZEWdNvn9zompPzR6Hl0sf1UGLZmPPOTFwBeFWxcAkXckZqH972me3Ydf261zam1mZquS8ZADP8OfgkNWDXLmu6dOqyitzsPaTg1qHxp4mzpid9q0qPCAm3dG796IvqMl8kBPHqq8loBRO_MH2HQ')"}}>
+                                <div className="absolute inset-0 bg-slate-900/40"></div>
+                                <div className="absolute top-3 left-4 flex gap-2">
+                                    <span className="bg-blue-600 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider text-white">Featured</span>
+                                </div>
+                            </div>
+                            <div className="p-4 space-y-4">
+                                <h3 className="text-lg font-semibold leading-tight">Will ETH reach $5,000 by end of year?</h3>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-[11px] font-medium text-slate-400 uppercase">
+                                        <span className="text-success">65% Yes</span>
+                                        <span className="text-danger">35% No</span>
+                                    </div>
+                                    <div className="h-1.5 w-full bg-slate-700 rounded-full overflow-hidden flex">
+                                        <div className="h-full bg-success" style={{width: '65%'}}></div>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3 pt-2">
+                                    <button className="bg-success/10 hover:bg-success/20 border border-success/20 text-success py-2.5 rounded-lg text-sm font-semibold">Yes</button>
+                                    <button className="bg-danger/10 hover:bg-danger/20 border border-danger/20 text-danger py-2.5 rounded-lg text-sm font-semibold">No</button>
+                                </div>
+                                <div className="flex items-center justify-between text-slate-500 text-[11px] pt-1">
+                                    <div className="flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-[14px]">database</span>
+                                        <span>$1.2M Vol</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <span className="material-symbols-outlined text-[14px]">history</span>
+                                        <span>Ends in 2d</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="glass-card rounded-xl p-4 space-y-4">
+                            <div className="flex gap-3">
+                                <div className="w-12 h-12 shrink-0 rounded-lg bg-slate-800 overflow-hidden border border-slate-700">
+                                    <img alt="TON" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_JnM58htxrmI18Oh_WaGWmrAuAVk1hLw7qewgxI7JM7fKw3jKRN29mMofaAYZEKwCqdrFklXcJ4saJ97xU4hqxhz1M11zHtezfI0hFBthHcCxC8WoQ3m58sTgjKEyWNAqUs_iNzw-ALSxzpIKQCgLeVOJ8T8yzHHPEHt0FtkHEk20TJb6BOQg2zBn6hzQvTRt6AWdeyVYtzB3OgljQd9kbzO1NCS3UvNWw7SDCPp7_BxWDQQNTX2_OFM7nVEskI43f2oMa4qI1A"/>
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-semibold text-sm leading-snug">Will TON break top 5 by Market Cap?</h4>
+                                    <p className="text-slate-500 text-[11px] mt-1">Ends Jul 31 • $420K Volume</p>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="h-1 w-full bg-slate-700 rounded-full overflow-hidden flex">
+                                    <div className="h-full bg-success" style={{width: '40%'}}></div>
+                                </div>
+                                <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase">
+                                    <span className="text-success/80">40% Yes</span>
+                                    <span className="text-danger/80">60% No</span>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <button className="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 rounded-lg text-xs font-semibold">Yes</button>
+                                <button className="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 rounded-lg text-xs font-semibold">No</button>
+                            </div>
+                        </div>
+
+                        <div className="glass-card rounded-xl p-4 space-y-4">
+                            <div className="flex gap-3">
+                                <div className="w-12 h-12 shrink-0 rounded-lg bg-slate-800 overflow-hidden border border-slate-700">
+                                    <img alt="AI" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4_RBinyqrHLbKiaZMqu4QJjmnbkpnF949KRmCkhAqjV7BY7szf2X09ql0cwIRurwzGI8fgk1B5CRYKdSz9BrDgexVlmsUzTh6Nb8STsNt51Ge0y4bB0hIzQCd0MWbAJEUzD3qbD6hn-jn_TZuTZ1bZBJsy19BqDJUwUxXIIMXket4Qama-K7VGTkMrVoSOfpO5BoRb7I1Eh0xcB1I7J2oaRb49M_voAI-dRTA0eND58tAc4_AmJ4PlyGYwi2VtFFdMeQ2JNGVDw"/>
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="font-semibold text-sm leading-snug">Will GPT-5 be released in 2024?</h4>
+                                    <p className="text-slate-500 text-[11px] mt-1">Ends Dec 31 • $890K Volume</p>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="h-1 w-full bg-slate-700 rounded-full overflow-hidden flex">
+                                    <div className="h-full bg-success" style={{width: '20%'}}></div>
+                                </div>
+                                <div className="flex justify-between text-[10px] font-bold text-slate-500 uppercase">
+                                    <span className="text-success/80">20% Yes</span>
+                                    <span className="text-danger/80">80% No</span>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <button className="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 rounded-lg text-xs font-semibold">Yes</button>
+                                <button className="bg-slate-700 hover:bg-slate-600 text-slate-200 py-2 rounded-lg text-xs font-semibold">No</button>
+                            </div>
+                        </div>
+                    </main>
+                    <BottomNav active="markets" />
+                </div>
+            );
+        };
+
+        // --- Screen 2: Market Detail ---
+
+        const MarketDetailPage = () => {
+            const navigate = useNavigate();
+            return (
+                <div className="min-h-screen pb-48">
+                    <Header title="Market Detail" showBack={true} />
+
+                    <header className="px-4 pt-6 max-w-md mx-auto">
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-success/10 text-success">
+                                <div className="size-1.5 rounded-full bg-success"></div>
+                                <span className="text-[10px] font-bold uppercase tracking-wider">Live</span>
+                            </div>
+                            <span className="text-[11px] font-medium text-white/40 uppercase tracking-widest">Prediction Market</span>
+                        </div>
+                        <h2 className="text-2xl font-bold leading-tight mb-6">Will ETH reach $5,000 by Dec 31, 2024?</h2>
+                        
+                        <div className="space-y-3 mb-8">
+                            <div className="flex justify-between items-end">
+                                <div className="flex flex-col">
+                                    <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-1">Chance of Yes</span>
+                                    <span className="text-4xl font-bold tracking-tighter">65%</span>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider mb-1 block">Volume</span>
+                                    <span className="text-xl font-bold">2,450 <span className="text-primary text-sm">TON</span></span>
+                                </div>
+                            </div>
+                            <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden flex">
+                                <div className="h-full bg-primary" style={{width: '65%'}}></div>
+                                <div className="h-full bg-white/20" style={{width: '35%'}}></div>
+                            </div>
+                            <div className="flex justify-between text-[11px] font-bold tracking-wider">
+                                <span className="text-primary uppercase">65% Yes</span>
+                                <span className="text-white/40 uppercase">35% No</span>
+                            </div>
+                        </div>
+
+                        <div className="relative w-full h-44 mb-8">
+                            <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 400 150">
+                                <path d="M0,120 Q50,110 80,130 T150,80 T220,90 T300,40 T400,30" fill="none" stroke="#3289ec" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5"></path>
+                                <circle cx="400" cy="30" fill="#3289ec" r="4"></circle>
+                            </svg>
+                            <div className="absolute inset-x-0 bottom-0 flex justify-between text-[10px] font-bold text-white/30 uppercase pt-2 border-t border-white/5">
+                                <span>Nov 01</span>
+                                <span>Nov 15</span>
+                                <span>Dec 01</span>
+                                <span>Today</span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mb-8">
+                            <div className="flat-panel p-4 rounded-xl">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="material-symbols-outlined text-white/40 text-[18px]">calendar_today</span>
+                                    <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Ends On</span>
+                                </div>
+                                <p className="text-[15px] font-semibold">Dec 31, 2024</p>
+                            </div>
+                            <div className="flat-panel p-4 rounded-xl">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="material-symbols-outlined text-white/40 text-[18px]">verified_user</span>
+                                    <span className="text-[11px] font-bold text-white/40 uppercase tracking-wider">Resolves By</span>
+                                </div>
+                                <p className="text-[15px] font-semibold">Oracle Feed</p>
+                            </div>
+                        </div>
+                    </header>
+
+                    <main className="px-4 space-y-8 max-w-md mx-auto">
+                        <section>
+                            <h3 className="text-[12px] font-bold uppercase tracking-widest text-white/40 mb-3">Description</h3>
+                            <div className="flat-panel p-4 rounded-xl text-[14px] leading-relaxed text-white/70">
+                                This market resolves to "YES" if the price of Ethereum (ETH) reaches or exceeds $5,000.00 USD according to the Binance Spot price at any point before Dec 31, 2024, 23:59 UTC.
+                                <button className="text-primary font-bold mt-3 flex items-center gap-1">
+                                    Read resolution rules
+                                    <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                                </button>
+                            </div>
+                        </section>
+
+                        <section>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-[12px] font-bold uppercase tracking-widest text-white/40">Recent Trades</h3>
+                                <span className="text-[11px] text-primary font-bold uppercase tracking-wider">View All</span>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between p-3 flat-panel rounded-xl">
+                                    <div className="flex items-center gap-3">
+                                        <div className="size-9 rounded-full bg-white/10 flex items-center justify-center font-bold text-[12px]">JT</div>
+                                        <div>
+                                            <p className="text-[13px] font-bold">John_TON</p>
+                                            <p className="text-[11px] text-white/40">Bought <span className="text-success font-bold">YES</span> • 2m ago</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[13px] font-bold">45.0 TON</p>
+                                        <p className="text-[10px] text-white/40">~$214.20</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between p-3 flat-panel rounded-xl">
+                                    <div className="flex items-center gap-3">
+                                        <div className="size-9 rounded-full bg-white/10 flex items-center justify-center font-bold text-[12px]">S9</div>
+                                        <div>
+                                            <p className="text-[13px] font-bold">Satoshi99</p>
+                                            <p className="text-[11px] text-white/40">Bought <span className="text-danger font-bold">NO</span> • 12m ago</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-[13px] font-bold">120.5 TON</p>
+                                        <p className="text-[10px] text-white/40">~$578.40</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </main>
+
+                    <div className="fixed bottom-16 inset-x-0 p-4 bg-background-dark/80 backdrop-blur-xl border-t border-white/5 z-40">
+                        <div className="flex gap-3 max-w-xl mx-auto">
+                            <button className="flex-1 flex flex-col items-center justify-center py-3.5 rounded-xl bg-primary text-white font-bold active:opacity-90 transition-opacity">
+                                <span className="text-[16px]">BET YES</span>
+                                <span className="text-[9px] opacity-70 uppercase tracking-widest font-bold">0.65 TON</span>
+                            </button>
+                            <button className="flex-1 flex flex-col items-center justify-center py-3.5 rounded-xl bg-white/10 text-white font-bold active:bg-white/20 transition-all">
+                                <span className="text-[16px]">BET NO</span>
+                                <span className="text-[9px] opacity-50 uppercase tracking-widest font-bold">0.35 TON</span>
+                            </button>
+                        </div>
+                    </div>
+                    <BottomNav active="markets" />
+                </div>
+            );
+        };
+
+        // --- Screen 3: Portfolio ---
+
+        const PortfolioPage = () => {
+            return (
+                <div className="min-h-screen pb-24">
+                    <Header title="Portfolio" showProfile={false} />
+                    <main className="p-4 space-y-4 max-w-md mx-auto">
+                        <section className="flat-card rounded-xl p-5">
+                            <div className="flex justify-between items-start mb-6">
+                                <div>
+                                    <p className="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">Total Portfolio</p>
+                                    <div className="flex items-baseline gap-2">
+                                        <h2 className="text-2xl font-bold tracking-tight">2,450.00</h2>
+                                        <span className="text-primary text-sm font-bold">TON</span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-500 mt-0.5">≈ $12,845.20 USD</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">P&L</p>
+                                    <div className="text-emerald-500 font-bold text-lg">+125 TON</div>
+                                    <div className="text-[10px] text-emerald-500/80 font-bold uppercase">+5.10%</div>
+                                </div>
+                            </div>
+                            <div className="flex gap-3">
+                                <button className="flex-1 bg-primary text-white py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2">
+                                    <span className="material-symbols-outlined text-sm">add</span> Deposit
+                                </button>
+                                <button className="flex-1 bg-card-dark border border-border-dark py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2">
+                                    <span className="material-symbols-outlined text-sm">arrow_outward</span> Send
+                                </button>
+                            </div>
+                        </section>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="flat-card rounded-lg p-3">
+                                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">Active Stakes</p>
+                                <p className="text-base font-bold">350 TON</p>
+                            </div>
+                            <div className="flat-card rounded-lg p-3">
+                                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider mb-1">Win Rate</p>
+                                <p className="text-base font-bold">68.4%</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 pt-2">
+                            <div className="flex items-center justify-between px-1">
+                                <h3 className="text-sm font-bold tracking-tight">Active Positions</h3>
+                                <span className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded font-bold uppercase">3 Open</span>
+                            </div>
+                            
+                            <div className="relative group overflow-hidden rounded-2xl bg-gradient-to-br from-[#1c2631] to-[#161C26] border border-white/5 shadow-2xl">
+                                <div className="absolute top-0 left-0 w-1 h-full bg-primary shadow-[0_0_15px_rgba(50,137,236,0.5)]"></div>
+                                <div className="p-5">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <div className="flex-1 pr-4">
+                                            <div className="flex items-center gap-2 mb-1.5">
+                                                <span className="flex size-1.5 rounded-full bg-primary animate-pulse"></span>
+                                                <span className="text-[10px] font-bold text-primary uppercase tracking-[0.1em]">Active Prediction</span>
+                                            </div>
+                                            <h4 className="text-[15px] font-bold leading-tight text-white group-hover:text-primary transition-colors">BTC Price &gt; $72k by end of April</h4>
+                                        </div>
+                                        <div className="text-right bg-emerald-500/5 px-3 py-2 rounded-xl border border-emerald-500/10 backdrop-blur-sm">
+                                            <p className="text-[9px] text-emerald-500/60 uppercase font-black tracking-tighter leading-none mb-1">Unrealized P&L</p>
+                                            <p className="text-[15px] font-black text-emerald-400 leading-none">+12.40 <span className="text-[10px]">TON</span></p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-3 gap-2 p-1.5 bg-black/20 rounded-xl border border-white/5">
+                                        <div className="bg-[#1c2631]/50 rounded-lg p-2.5">
+                                            <p className="text-[8px] text-slate-500 uppercase font-bold tracking-widest mb-1">Stake</p>
+                                            <p className="text-xs font-bold text-slate-200">50.00 <span className="text-[9px] text-slate-500">TON</span></p>
+                                        </div>
+                                        <div className="bg-[#1c2631]/50 rounded-lg p-2.5">
+                                            <p className="text-[8px] text-slate-500 uppercase font-bold tracking-widest mb-1">Potential</p>
+                                            <p className="text-xs font-bold text-primary">115.00 <span className="text-[9px] opacity-70">TON</span></p>
+                                        </div>
+                                        <button className="flex items-center justify-center rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition-all active:scale-95">
+                                            <span className="material-symbols-outlined text-[18px] text-slate-400">settings</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </main>
+                    <BottomNav active="portfolio" />
+                </div>
+            );
+        };
+
+        // --- Screen 4: Menu ---
+
+        const MenuPage = () => {
+            const menuSections = [
+                {
+                    title: "Activity & Growth",
+                    items: [
+                        { label: "My Activity", icon: "history", desc: "Detailed trade history and results" },
+                        { label: "Achievements", icon: "military_tech", desc: "Unlock badges and earn multipliers" },
+                        { label: "Referral Program", icon: "group_add", desc: "Earn 10% from friend's commissions" }
+                    ]
+                },
+                {
+                    title: "Wallet & Security",
+                    items: [
+                        { label: "Wallet Settings", icon: "account_balance_wallet", desc: "Security, private keys and TON setup" },
+                        { label: "Transaction History", icon: "receipt_long", desc: "Internal transfers and deposits" },
+                        { label: "Notifications", icon: "notifications_active", desc: "Price alerts and market outcomes" }
+                    ]
+                },
+                {
+                    title: "Preferences",
+                    items: [
+                        { label: "Language", icon: "language", desc: "English (US)" },
+                        { label: "Currency Display", icon: "payments", desc: "Show values in USD or TON" },
+                        { label: "Theme", icon: "dark_mode", desc: "Switch between Dark and AMOLED" }
+                    ]
+                },
+                {
+                    title: "Information",
+                    items: [
+                        { label: "Polygram Wiki", icon: "menu_book", desc: "Learn how markets resolve" },
+                        { label: "Platform Statistics", icon: "bar_chart", desc: "Total TVL and volume data" },
+                        { label: "Support Chat", icon: "support_agent", desc: "24/7 Support via Telegram" }
+                    ]
+                }
+            ];
+
+            return (
+                <div className="min-h-screen pb-32">
+                    <Header title="Menu" showProfile={true} />
+                    <main className="max-w-md mx-auto p-4 space-y-8">
+                        {/* Profile Summary */}
+                        <div className="flex items-center gap-4 p-4 flat-card rounded-xl">
+                            <img className="w-14 h-14 rounded-full border border-primary/20 object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-wm18rphXIxb-tEIsT21NO21ROcZK8oBvzTLRSjoWZ7KJqBE8jKlm3QZ0DIprsYcc7N-SKe7lXJwglGpYVGuKhegB3XOPj-vHkZ8dySaN9uc7d3y_F798GGd25JWK8mwR4ysjH5jnJ8AM8u6NMv24bvgDl4rf7R_TOVrrxAQTjrnFmx70l8ybhlOPJf5XATNBckZhDjV32heZoa7shUsW1iTcLxTSwsLAYX7SpodajlW3UoNR418cbeNw1aHnOb1anTvcJ18J3w" />
+                            <div className="flex-1">
+                                <h2 className="font-bold text-lg">Alex.ton</h2>
+                                <p className="text-xs text-slate-500 font-medium">UQCv...4n2 • Pro Tier</p>
+                            </div>
+                            <span className="material-symbols-outlined text-slate-500">chevron_right</span>
+                        </div>
+
+                        {menuSections.map((section, idx) => (
+                            <div key={idx} className="space-y-3">
+                                <h3 className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-500 px-1">{section.title}</h3>
+                                <div className="space-y-px rounded-xl overflow-hidden border border-border-dark">
+                                    {section.items.map((item, i) => (
+                                        <div key={i} className="group relative">
+                                            <button className="w-full flex items-center gap-4 p-4 bg-surface-dark hover:bg-slate-800/80 transition-all border-b border-border-dark last:border-0 text-left active:bg-slate-800">
+                                                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                                    <span className="material-symbols-outlined text-primary">{item.icon}</span>
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-sm font-semibold text-slate-100 group-hover:text-white transition-colors">{item.label}</p>
+                                                        {item.label === "Referral Program" && (
+                                                            <span className="bg-success/20 text-success text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-tighter">New</span>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-[11px] text-slate-500 group-hover:text-slate-400 transition-colors truncate">{item.desc}</p>
+                                                </div>
+                                                <span className="material-symbols-outlined text-slate-600 group-hover:text-slate-400 group-hover:translate-x-1 transition-all text-lg">chevron_right</span>
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+
+                        <div className="pt-4 pb-8 flex flex-col items-center gap-4">
+                            <div className="flex gap-6">
+                                <button className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400"><span className="material-symbols-outlined">share</span></button>
+                                <button className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400"><span className="material-symbols-outlined">star</span></button>
+                                <button className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400"><span className="material-symbols-outlined">description</span></button>
+                            </div>
+                            <p className="text-[10px] text-slate-600 font-medium uppercase tracking-widest">Polygram Markets v1.2.4</p>
+                        </div>
+                    </main>
+                    <BottomNav active="menu" />
+                </div>
+            );
+        };
+
+        // --- Screen 5: Leaderboard ---
+
+        const LeaderboardPage = () => {
+            return (
+                <div className="min-h-screen pb-48">
+                    <Header title="Leaderboard" showProfile={true} />
+
+                    <div className="max-w-md mx-auto">
+                        <div className="px-4 py-2 flex gap-2 overflow-x-auto no-scrollbar">
+                            <button className="px-5 py-2 rounded-full text-sm font-semibold bg-primary text-white whitespace-nowrap">Daily</button>
+                            <button className="px-5 py-2 rounded-full text-sm font-semibold bg-surface-dark text-slate-400 border border-border-dark whitespace-nowrap">Weekly</button>
+                            <button className="px-5 py-2 rounded-full text-sm font-semibold bg-surface-dark text-slate-400 border border-border-dark whitespace-nowrap">All Time</button>
+                        </div>
+
+                        <div className="flex items-end justify-center gap-3 px-4 pt-10 pb-8">
+                            <div className="flex flex-col items-center flex-1">
+                                <div className="relative mb-3">
+                                    <div className="w-16 h-16 rounded-full border-2 border-border-dark bg-surface-dark p-0.5">
+                                        <img className="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBChoKBAqhy5NALK4qgPy7S-jgf8lI_la3GkPn1uvs5iC93safEQm7D4qdyxAOUXjuQNXrLcmRgqXuWPScpjVdOpeTG3nhJhT5wJ8BrhfnFGAwornc6SIqPO4oH3g-NUYIbwZ6eeQRHUphD7QfWm2AVXDCGYZDcorLvJgU7b77K-MZHRzf9mlRaBmanBpIthKiRIcjhv22IAZLKKO4eao5kGdPUlHt6TbwBp5E2ChbgNsHNHykv7kcd6ffPcWT9fTatmf7xeEPWeg"/>
+                                    </div>
+                                    <div className="absolute -bottom-1 -right-1 bg-silver text-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">2</div>
+                                </div>
+                                <p className="text-xs font-semibold truncate w-20 text-center text-slate-300">@AlexTON</p>
+                                <p className="text-xs text-green-400 font-medium">+842.10</p>
+                            </div>
+
+                            <div className="flex flex-col items-center flex-1 -mt-4">
+                                <div className="relative mb-3">
+                                    <div className="w-20 h-20 rounded-full border-2 border-primary bg-surface-dark p-1">
+                                        <img className="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdrUX8qbyvAKjPiY5GzpVfj7kW_bxHWiD-g7iwdnFsvznGE_XvwzhavucQ1e_EE6AniBtdpfCziSXgh5N5S38bKt_7LAQTuCr9O7u9iryJSqTGkN6e1nC4ZcXDHdsqjYuvlPFaxgU6ymSnBEjDPlhhsvP-DF9rY_j9UyiAyPRwCKjkVFX5pYmHEY5W7HoYFZO23yOz6PNi9ZfBJYjejkiuf-H7GwlRD6CLezIDerBLKG6CPsxLCiOIsM_LiB3JBqwXHsp5FndKDA"/>
+                                    </div>
+                                    <div className="absolute -bottom-1 -right-1 bg-primary text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">1</div>
+                                </div>
+                                <p className="text-sm font-bold truncate w-24 text-center">@CryptoWhale</p>
+                                <p className="text-sm text-green-400 font-bold">+1,240.50</p>
+                            </div>
+
+                            <div className="flex flex-col items-center flex-1">
+                                <div className="relative mb-3">
+                                    <div className="w-16 h-16 rounded-full border-2 border-border-dark bg-surface-dark p-0.5">
+                                        <img className="w-full h-full object-cover rounded-full" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSAvF6Eba2AEdZ3rXeaxEBTnckdQ0rNQlbuNQUfchDKGHv2EaS91RqcUVzLDe7WeThwtv5rYP5qrZD1Z7pzAr0MuTom4oa8ODk2nNpLbp81PgRZ6PQRdXTYk8uM4hW6FSAxr3Kw3pAZEFemrqThJxSjqhEAf9yurKXBnd49ffknIuqKXX98EXrFAsbP_8-v3nTyTUP3X0psMNb7JX9Q13z-co9DjYX8O4a05-XR3k97_NCmgJ68my_UeiIh7XnC2uxq10BRhi64A"/>
+                                    </div>
+                                    <div className="absolute -bottom-1 -right-1 bg-bronze text-black text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">3</div>
+                                </div>
+                                <p className="text-xs font-semibold truncate w-20 text-center text-slate-300">@SolanaMasta</p>
+                                <p className="text-xs text-green-400 font-medium">+612.30</p>
+                            </div>
+                        </div>
+
+                        <div className="px-4 space-y-2">
+                            {[4, 5, 6, 7].map(rank => (
+                                <div key={rank} className="flex items-center gap-3 h-16 px-4 bg-surface-dark rounded-xl border border-border-dark">
+                                    <span className="w-6 text-sm font-bold text-slate-500">{rank}</span>
+                                    <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center overflow-hidden">
+                                        <img className="w-full h-full object-cover" src={`https://i.pravatar.cc/100?img=${rank + 10}`} />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-semibold truncate">@Trader_{rank}</p>
+                                        <p className="text-[11px] text-slate-400 flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-[12px] text-green-400">trending_up</span>
+                                            70% WR
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm font-bold text-green-400">+245.20</p>
+                                        <p className="text-[11px] text-slate-500">ROI 45%</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="fixed bottom-[88px] left-4 right-4 z-[60] max-w-md mx-auto">
+                        <div className="bg-[#1c2631] border border-primary/30 shadow-[0_8px_32px_rgba(0,0,0,0.5)] rounded-2xl px-4 py-3 flex items-center gap-4">
+                            <div className="flex items-center justify-center size-10 rounded-xl bg-primary/20 border border-primary/30">
+                                <span className="text-lg font-black text-primary">124</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-0.5">
+                                    <p className="text-sm font-bold truncate text-white">Your Rank</p>
+                                    <span className="text-[10px] font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">Top 12%</span>
+                                </div>
+                                <p className="text-xs text-slate-400">Profit: <span className="text-success font-bold">+42.50 TON</span></p>
+                            </div>
+                            <button className="size-10 flex items-center justify-center rounded-full bg-slate-800 border border-white/5 active:scale-90 transition-transform">
+                                <span className="material-symbols-outlined text-slate-400 text-[20px]">share</span>
+                            </button>
+                        </div>
+                    </div>
+                    <BottomNav active="leaderboard" />
+                </div>
+            );
+        };
+
+        // --- App Entry Point ---
+
+        const App = () => {
+            return (
+                <MemoryRouter>
+                    <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/market/:id" element={<MarketDetailPage />} />
+                        <Route path="/portfolio" element={<PortfolioPage />} />
+                        <Route path="/leaderboard" element={<LeaderboardPage />} />
+                        <Route path="/menu" element={<MenuPage />} />
+                    </Routes>
+                </MemoryRouter>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
