@@ -1,4 +1,5 @@
-import { PrismaClient, MarketStatus } from '@prisma/client';
+import { PrismaClient, MarketStatus, Market } from '@prisma/client';
+import { PRICE_HISTORY_CONFIG } from '../core/constants.js';
 import { MarketState } from '@polygram/shared';
 import { IMarketRepository, MarketData } from '../modules/market/market.service.js';
 import { MarketProposal } from '../infrastructure/ai.service.js';
@@ -26,7 +27,7 @@ export class PrismaMarketRepository implements IMarketRepository {
       orderBy: { createdAt: 'desc' }
     });
 
-    return markets.map((m: any) => ({
+    return markets.map((m: Market) => ({
       id: m.id,
       question: m.question,
       status: m.status,

@@ -3,7 +3,7 @@
  * Following SOLID: Single Responsibility - handles portfolio calculations
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
 import { LMSRCalculator, MarketState } from '@polygram/shared';
 
 export interface PortfolioData {
@@ -67,7 +67,7 @@ export class PortfolioService implements IPortfolioService {
     }
 
     // Calculate invested amount
-    const investedAmount = user.positions.reduce((sum, pos) => sum + pos.invested, 0);
+    const investedAmount = user.positions.reduce((sum: number, pos: typeof user.positions[0]) => sum + pos.invested, 0);
 
     // Calculate current value of positions
     let currentValue = 0;
@@ -86,9 +86,9 @@ export class PortfolioService implements IPortfolioService {
 
     // Calculate win rate from closed positions
     const closedTrades = user.transactions.filter(
-      t => ['WIN_PAYOUT', 'SELL_YES', 'SELL_NO'].includes(t.type)
+      (t: typeof user.transactions[0]) => ['WIN_PAYOUT', 'SELL_YES', 'SELL_NO'].includes(t.type)
     );
-    const winningTrades = closedTrades.filter(t => t.amount > 0).length;
+    const winningTrades = closedTrades.filter((t: typeof user.transactions[0]) => t.amount > 0).length;
     const winRate = closedTrades.length > 0 ? (winningTrades / closedTrades.length) * 100 : 0;
 
     return {
@@ -108,7 +108,7 @@ export class PortfolioService implements IPortfolioService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return positions.map((position) => {
+    return positions.map((position: typeof positions[0]) => {
       const marketState: MarketState = {
         qYes: position.market.qYes,
         qNo: position.market.qNo,

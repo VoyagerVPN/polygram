@@ -27,7 +27,19 @@ export default defineConfig({
   ],
   build: {
     target: 'esnext',
-    minify: 'terser'
+    minify: 'terser',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Separate vendor libraries
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-telegram': ['@tma.js/sdk-react', '@telegram-apps/telegram-ui'],
+          'vendor-ui': ['framer-motion', 'lucide-react'],
+          'vendor-charts': ['lightweight-charts'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 1000, // Increase limit to 1000KB
   },
   publicDir: './public',
   server: {

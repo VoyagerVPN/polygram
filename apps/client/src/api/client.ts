@@ -11,6 +11,7 @@ import type {
   TradeResponse,
   PortfolioData,
   PortfolioPosition,
+  Transaction,
 } from '@/types';
 
 class APIError extends Error {
@@ -18,7 +19,7 @@ class APIError extends Error {
     message: string,
     public statusCode?: number,
     public response?: Response,
-    public data?: any
+    public data?: unknown
   ) {
     super(message);
     this.name = 'APIError';
@@ -122,8 +123,8 @@ export const api = {
   /**
    * Get user transactions
    */
-  async getTransactions(): Promise<any[]> {
-    return fetchJSON<any[]>(`${API_BASE_URL}/portfolio/transactions`);
+  async getTransactions(): Promise<Transaction[]> {
+    return fetchJSON<Transaction[]>(`${API_BASE_URL}/portfolio/transactions`);
   },
 };
 

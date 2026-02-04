@@ -1,6 +1,7 @@
 import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
+import { CACHE_CONFIG } from '../core/constants.js';
 
 export interface NewsEntry {
   title: string;
@@ -39,12 +40,12 @@ export class NewsService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json() as any;
+      const data = await response.json() as { results: Array<{ title: string; description?: string; url: string; published_at: string }> };
       if (!data.results || !Array.isArray(data.results)) {
         throw new Error('Invalid API response format');
       }
 
-      const entries: NewsEntry[] = data.results.map((item: any) => ({
+      const entries: NewsEntry[] = data.results.map((item: { title: string; description?: string; url: string; published_at: string }) => ({
         title: item.title,
         description: item.description,
         url: item.url,
@@ -83,7 +84,7 @@ export class NewsService {
   private async readCache(): Promise<NewsEntry[] | null> {
     try {
       const stats = await fs.stat(this.cachePath);
-      const isFresh = (Date.now() - stats.mtimeMs) < 24 * 60 * 60 * 1000; // 24h
+      const isFresh = (Date.now() - stats.mtimeMs) < CACHE_CONFIG.NEWS_CACHE_TTL_MS;
       
       if (isFresh) {
         const data = await fs.readFile(this.cachePath, 'utf8');

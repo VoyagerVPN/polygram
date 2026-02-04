@@ -4,7 +4,7 @@ import { NewsEntry } from './news.service.js';
 export interface MarketProposal {
   question: string;
   description: string;
-  expiresAt: string;
+  expiresAt: Date;
   liquidityB: number;
 }
 
@@ -74,7 +74,7 @@ export class AiService {
       return {
         question: parsed.question || parsed.title || 'Unknown Question',
         description: parsed.description || parsed.details || 'No description provided',
-        expiresAt: parsed.expiresAt || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        expiresAt: new Date(parsed.expiresAt || Date.now() + 7 * 24 * 60 * 60 * 1000),
         liquidityB: Number(parsed.liquidityB) || 150
       };
     } catch (err) {

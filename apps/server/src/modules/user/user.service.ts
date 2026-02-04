@@ -61,4 +61,51 @@ export class UserService {
       }
     };
   }
+
+  async getLeaderboard(period: string, limit: number = 20) {
+    // For MVP: Simple ranking by balance
+    // In production: Calculate based on realized PnL for the period
+    
+    const since = this.getPeriodStartDate(period);
+    
+    return this.prisma.user.findMany({
+      where: since ? {
+        createdAt: {
+          gte: since
+        }
+      } : undefined,
+      orderBy: {
+        balance: 'desc'
+      },
+      take: limit,
+      include: {
+        transactions: {
+          where: since ? {
+            createdAt: {
+              gte: since
+            }
+          } : undefined,
+          select: {
+            id: true
+          }
+        }
+      }
+    });
+  }
+
+  private getPeriodStartDate(period: string): Date | null {
+    const now = new Date();
+    
+    switch (period) {
+      case 'daily':
+        return new Date(now.setDate(now.getDate() - 1));
+      case 'weekly':
+        return new Date(now.setDate(now.getDate() - 7));
+      case 'monthly':
+        return new Date(now.setMonth(now.getMonth() - 1));
+      case 'all_time':
+      default:
+        return null;
+    }
+  }
 }

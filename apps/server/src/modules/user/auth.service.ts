@@ -3,6 +3,7 @@ import { Buffer } from 'node:buffer';
 import nacl from 'tweetnacl';
 import { Address } from '@ton/core';
 import { sha256 } from '@ton/crypto';
+import { AUTH_CONFIG } from '../../core/constants.js';
 
 export interface TonProofPayload {
   address: string;
@@ -27,7 +28,7 @@ export class AuthService {
    * Generates a secure random payload (nonce) for ton_proof
    */
   async generatePayload(): Promise<string> {
-    return crypto.randomBytes(32).toString('hex');
+    return crypto.randomBytes(AUTH_CONFIG.PAYLOAD_BYTES_LENGTH).toString('hex');
   }
 
   /**
@@ -45,7 +46,7 @@ export class AuthService {
       }
 
       const now = Math.floor(Date.now() / 1000);
-      if (now - proof.timestamp > 600) { // 10 minutes expiry
+      if (now - proof.timestamp > AUTH_CONFIG.PAYLOAD_EXPIRY_SECONDS) {
         console.error('[Auth] Proof expired');
         return false;
       }

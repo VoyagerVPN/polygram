@@ -1,4 +1,7 @@
-import { PrismaClient, MarketStatus, Outcome } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client';
+import { RESOLUTION_CONFIG } from '../core/constants.js';
+
+type Outcome = 'YES' | 'NO';
 import { MarketService } from '../modules/market/market.service.js';
 import { AiService } from './ai.service.js';
 import { NewsService, NewsEntry } from './news.service.js';
@@ -75,7 +78,7 @@ export class ResolutionService {
 
     // Calculate payouts
     // In LMSR, usually winners get 1 unit per share
-    await this.prisma.$transaction(async (tx: any) => {
+    await this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       for (const position of market.positions) {
         let payout = 0;
         if (outcome === 'YES') {
@@ -108,6 +111,6 @@ export class ResolutionService {
 
   start() {
     console.log('[Resolution] Scheduler started.');
-    setInterval(() => this.checkAndResolveMarkets(), 600000); // Check every 10 mins
+    setInterval(() => this.checkAndResolveMarkets(), RESOLUTION_CONFIG.CHECK_INTERVAL_MS);
   }
 }

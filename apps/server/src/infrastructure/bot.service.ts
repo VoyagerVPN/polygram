@@ -167,7 +167,7 @@ export class BotService {
     });
   }
 
-  async notifyAdminOfProposal(marketId: string, proposal: any) {
+  async notifyAdminOfProposal(marketId: string, proposal: { question: string; description: string; expiresAt: Date }) {
     const adminId = process.env.ADMIN_CHAT_ID;
     if (!adminId) {
       console.warn('[Bot] ADMIN_CHAT_ID not set. Cannot send automated proposal.');

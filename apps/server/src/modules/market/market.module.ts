@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { MarketService } from './market.service.js';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, PriceHistory } from '@prisma/client';
+import { PRICE_HISTORY_CONFIG } from '../../core/constants.js';
 
 export interface MarketModuleOptions {
   prisma: PrismaClient;
@@ -8,8 +9,9 @@ export interface MarketModuleOptions {
 }
 
 export async function MarketModule(fastify: FastifyInstance, options: MarketModuleOptions) {
-  const { prisma, service } = options;
+  const { prisma } = options;
   
+  // GET /api/markets - List all markets
   fastify.get('/', async (request, reply) => {
     try {
       const markets = await prisma.market.findMany({
@@ -23,6 +25,7 @@ export async function MarketModule(fastify: FastifyInstance, options: MarketModu
     }
   });
 
+  // GET /api/markets/:id - Get market details
   fastify.get('/:id', async (request, reply) => {
     const { id } = request.params as { id: string };
     const market = await prisma.market.findUnique({ where: { id } });
@@ -31,23 +34,16 @@ export async function MarketModule(fastify: FastifyInstance, options: MarketModu
     return market;
   });
 
-  fastify.post('/:id/trade', async (request, reply) => {
-    const { id } = request.params as { id: string };
-    const { userId, amount, isYes } = request.body as { userId: string, amount: number; isYes: boolean };
-    
-    await service.trade(id, userId, amount, isYes);
-    return { success: true };
-  });
-
+  // GET /api/markets/:id/history - Get price history
   fastify.get('/:id/history', async (request) => {
     const { id } = request.params as { id: string };
     const history = await prisma.priceHistory.findMany({
       where: { marketId: id },
       orderBy: { timestamp: 'asc' },
-      take: 100
+      take: PRICE_HISTORY_CONFIG.MAX_HISTORY_POINTS
     });
     return { 
-      history: history.map((h: any) => ({
+      history: history.map((h: PriceHistory) => ({
         time: h.timestamp.toISOString().split('T')[0],
         value: h.priceYes
       }))

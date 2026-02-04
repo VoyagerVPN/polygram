@@ -13,11 +13,11 @@ describe('Trading API', () => {
     await cleanupApp(app);
   });
 
-  describe('POST /api/trading', () => {
+  describe('POST /api/trades', () => {
     it('should handle trade execution', async () => {
       const response = await app.inject({
         method: 'POST',
-        url: '/api/trading',
+        url: '/api/trades',
         payload: {
           marketId: 'test-market',
           outcome: 'YES',
@@ -30,11 +30,11 @@ describe('Trading API', () => {
     });
   });
 
-  describe('GET /api/trading/estimate', () => {
+  describe('GET /api/trades/estimate', () => {
     it('should handle estimate request', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/api/trading/estimate?marketId=test&amount=100&outcome=YES'
+        url: '/api/trades/estimate?marketId=test&amount=100&outcome=YES'
       });
 
       // Endpoint may return various status codes depending on implementation

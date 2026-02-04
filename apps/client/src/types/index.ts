@@ -161,6 +161,18 @@ export interface PortfolioPosition {
   pnlPercent: number;
 }
 
+// Transaction Type
+export interface Transaction {
+  id: string;
+  type: 'BUY_YES' | 'BUY_NO' | 'SELL_YES' | 'SELL_NO' | 'DEPOSIT' | 'WITHDRAW' | 'WIN_PAYOUT';
+  amount: number;
+  marketId?: string;
+  marketQuestion?: string;
+  price?: number;
+  shares?: number;
+  createdAt: string;
+}
+
 // Utility Types
 export type Nullable<T> = T | null;
 export type Optional<T> = T | undefined;

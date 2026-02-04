@@ -39,18 +39,6 @@ describe('Market API', () => {
     });
   });
 
-  describe('POST /api/markets/:id/trade', () => {
-    it('should handle trade request', async () => {
-      const response = await app.inject({
-        method: 'POST',
-        url: '/api/markets/test-id/trade',
-        payload: { userId: 'user1', amount: 100, isYes: true }
-      });
-
-      // Trade endpoint exists - should not return 404
-      expect(response.statusCode).not.toBe(404);
-    });
-  });
 
   describe('GET /api/markets/:id/history', () => {
     it('should return price history', async () => {

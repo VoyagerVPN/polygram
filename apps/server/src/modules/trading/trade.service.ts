@@ -6,6 +6,7 @@
  */
 
 import { LMSRCalculator, MarketState } from '@polygram/shared';
+import { LMSR_CONFIG } from '../../core/constants.js';
 import { TradeExecution, TradeResult } from './trade.dto.js';
 import { ITradeRepository } from './trade.repository.interface.js';
 
@@ -90,7 +91,7 @@ export class TradeService implements ITradeService {
     let high = amount * 100; // Upper bound
     let shares = 0;
     
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < LMSR_CONFIG.MAX_ITERATIONS; i++) {
       const mid = (low + high) / 2;
       const testState: MarketState = {
         qYes: isYes ? qYes + mid : qYes,

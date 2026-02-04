@@ -52,7 +52,7 @@ export const IndexPage: FC = () => {
       <Header balance={userBalance} />
       
       {/* Main Content */}
-      <main className="relative z-10 pt-16 pb-28 px-4">
+      <main className="relative z-10 pt-16 pb-28 px-4 max-w-md mx-auto">
         {/* Featured Market Card */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}

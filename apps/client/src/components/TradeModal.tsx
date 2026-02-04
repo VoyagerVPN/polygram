@@ -37,7 +37,7 @@ export const TradeModal: FC<TradeModalProps> = ({
     currentPrice: number;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [_transactionId, setTransactionId] = useState<string | null>(null);
+  const [, setTransactionId] = useState<string | null>(null);
 
   const isYes = outcome === 'YES';
   const colorClass = isYes ? 'text-[var(--app-success)]' : 'text-[var(--app-danger)]';

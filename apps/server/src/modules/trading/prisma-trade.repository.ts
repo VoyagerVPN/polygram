@@ -3,10 +3,11 @@
  * Following SOLID: Concrete implementation of ITradeRepository
  */
 
-import { PrismaClient, TransactionType } from '@prisma/client';
+import { PrismaClient, Prisma, TransactionType } from '@prisma/client';
 import { MarketState } from '@polygram/shared';
 import { TradeExecution, TradeResult } from './trade.dto.js';
 import { ITradeRepository } from './trade.repository.interface.js';
+import { WsService } from '../../infrastructure/ws.service.js';
 
 export class PrismaTradeRepository implements ITradeRepository {
   constructor(private prisma: PrismaClient) {}
@@ -56,7 +57,7 @@ export class PrismaTradeRepository implements ITradeRepository {
     const { userId, marketId, outcome, amount } = execution;
     const isYes = outcome === 'YES';
 
-    return this.prisma.$transaction(async (tx: any) => {
+    return this.prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       // 1. Update user balance
       const updatedUser = await tx.user.update({
         where: { id: userId },
@@ -101,6 +102,12 @@ export class PrismaTradeRepository implements ITradeRepository {
           price: amount / sharesReceived,
           shares: sharesReceived,
         },
+      });
+
+      // 5. Broadcast update to all connected WebSocket clients
+      WsService.broadcastMarketUpdate(marketId, {
+        qYes: updatedMarket.qYes,
+        qNo: updatedMarket.qNo,
       });
 
       return {

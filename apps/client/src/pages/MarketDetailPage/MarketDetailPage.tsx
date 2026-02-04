@@ -48,7 +48,7 @@ export const MarketDetailPage: FC = () => {
       setIsLoading(true);
       const data = await api.getMarket(marketId!);
       setMarket(data);
-    } catch (err) {
+    } catch {
       setError('Failed to load market data');
     } finally {
       setIsLoading(false);

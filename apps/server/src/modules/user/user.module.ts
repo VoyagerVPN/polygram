@@ -65,4 +65,31 @@ export async function UserModule(fastify: FastifyInstance, options: { service: U
     
     return profile;
   });
+
+  /**
+   * 4. Get Leaderboard (Top traders by balance + realized PnL)
+   * Query params: period (all_time, weekly, daily) - currently supports all_time only
+   */
+  fastify.get('/leaderboard', async (request, reply) => {
+    try {
+      const { period = 'all_time' } = request.query as { period?: string };
+      
+      // Get top 20 users by balance
+      const topUsers = await service.getLeaderboard(period, 20);
+      
+      return {
+        period,
+        users: topUsers.map((user, index) => ({
+          rank: index + 1,
+          id: user.id,
+          username: user.username,
+          balance: user.balance,
+          totalTrades: user.transactions?.length || 0,
+        }))
+      };
+    } catch (err) {
+      console.error('[Leaderboard] Error:', err);
+      return reply.status(500).send({ error: 'Failed to fetch leaderboard' });
+    }
+  });
 }

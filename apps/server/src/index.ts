@@ -4,6 +4,7 @@ dotenv.config();
 import Fastify from 'fastify';
 import websocket from '@fastify/websocket';
 import cors from '@fastify/cors';
+import rateLimit from '@fastify/rate-limit';
 import { MarketModule } from './modules/market/market.module.js';
 import { BotService } from './infrastructure/bot.service.js';
 import { MarketService } from './modules/market/market.service.js';
@@ -77,7 +78,8 @@ const resolutionService = new ResolutionService(
 const tonService = new TonService(
   process.env.TONAPI_KEY || '',
   process.env.APP_WALLET || '',
-  userService
+  userService,
+  prisma
 );
 
 // Register Plugins
@@ -86,6 +88,18 @@ await fastify.register(cors, {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 });
 await fastify.register(websocket);
+
+// Rate Limiting: 100 requests per minute per IP
+await fastify.register(rateLimit, {
+  max: 100,
+  timeWindow: '1 minute',
+  errorResponseBuilder: (req, context) => ({
+    statusCode: 429,
+    error: 'Too Many Requests',
+    message: `Rate limit exceeded. Please try again in ${context.after}`,
+    retryAfter: context.after
+  })
+});
 
 // WebSocket Route
 fastify.get('/ws', { websocket: true }, (socket, req) => {

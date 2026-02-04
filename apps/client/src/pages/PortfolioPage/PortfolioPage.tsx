@@ -11,19 +11,54 @@ import {
   ArrowDownRight, 
   AlertCircle,
   Clock,
-  Package
+  Package,
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  Gift,
+  ArrowRightLeft
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
-// import { usePolygramStore } from '@/store/usePolygramStore';
 import { api } from '@/api/client';
-import type { PortfolioData, PortfolioPosition } from '@/types';
+import type { PortfolioData, PortfolioPosition, Transaction } from '@/types';
 import { formatNumber } from '@/helpers/format';
+
+const TRANSACTION_ICONS: Record<string, FC<{ className?: string }>> = {
+  BUY_YES: TrendingUp,
+  BUY_NO: TrendingDown,
+  SELL_YES: ArrowRightLeft,
+  SELL_NO: ArrowRightLeft,
+  DEPOSIT: Wallet,
+  WITHDRAW: Wallet,
+  WIN_PAYOUT: Gift,
+};
+
+const TRANSACTION_COLORS: Record<string, string> = {
+  BUY_YES: 'text-[var(--app-success)]',
+  BUY_NO: 'text-[var(--app-danger)]',
+  SELL_YES: 'text-[var(--app-primary)]',
+  SELL_NO: 'text-[var(--app-primary)]',
+  DEPOSIT: 'text-[var(--app-success)]',
+  WITHDRAW: 'text-[var(--app-danger)]',
+  WIN_PAYOUT: 'text-yellow-400',
+};
+
+const TRANSACTION_LABELS: Record<string, string> = {
+  BUY_YES: 'Buy YES',
+  BUY_NO: 'Buy NO',
+  SELL_YES: 'Sell YES',
+  SELL_NO: 'Sell NO',
+  DEPOSIT: 'Deposit',
+  WITHDRAW: 'Withdraw',
+  WIN_PAYOUT: 'Win Payout',
+};
 
 export const PortfolioPage: FC = () => {
   
   const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
   const [positions, setPositions] = useState<PortfolioPosition[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'positions' | 'history'>('positions');
@@ -37,13 +72,15 @@ export const PortfolioPage: FC = () => {
       setIsLoading(true);
       setError(null);
       
-      const [portfolioData, positionsData] = await Promise.all([
+      const [portfolioData, positionsData, transactionsData] = await Promise.all([
         api.getPortfolio(),
         api.getPositions(),
+        api.getTransactions(),
       ]);
       
       setPortfolio(portfolioData);
       setPositions(positionsData);
+      setTransactions(transactionsData);
     } catch (err) {
       setError('Failed to load portfolio data');
       console.error('Portfolio fetch error:', err);
@@ -127,15 +164,17 @@ export const PortfolioPage: FC = () => {
           
           <div className="grid grid-cols-2 gap-3">
             <motion.button 
-              className="bg-[var(--app-primary)] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(50,137,236,0.3)] transition-all"
+              className="bg-[var(--app-primary)] text-white py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(50,137,236,0.3)] transition-all opacity-50 cursor-not-allowed"
               whileTap={{ scale: 0.96 }}
+              disabled
             >
               <ArrowDownRight className="w-4 h-4" />
               Deposit
             </motion.button>
             <motion.button 
-              className="bg-[#1c2631] border border-white/5 text-slate-200 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-slate-700/50 transition-all"
+              className="bg-[#1c2631] border border-white/5 text-slate-200 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-slate-700/50 transition-all opacity-50 cursor-not-allowed"
               whileTap={{ scale: 0.96 }}
+              disabled
             >
               <ArrowUpRight className="w-4 h-4" />
               Send
@@ -193,7 +232,7 @@ export const PortfolioPage: FC = () => {
                 : 'text-slate-500'
             }`}
           >
-            History
+            History ({transactions.length})
           </button>
         </motion.div>
 
@@ -220,16 +259,7 @@ export const PortfolioPage: FC = () => {
               )}
             </motion.div>
           ) : (
-            <motion.div
-              key="history"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="text-center py-12"
-            >
-              <Clock className="w-12 h-12 text-slate-600 mx-auto mb-4" />
-              <p className="text-slate-500 text-sm">Transaction history coming soon</p>
-            </motion.div>
+            <TransactionHistoryList transactions={transactions} />
           )}
         </AnimatePresence>
       </main>
@@ -247,7 +277,6 @@ interface PositionCardProps {
 
 const PositionCard: FC<PositionCardProps> = ({ position, index }) => {
   const hasYesPosition = position.sharesYes > 0;
-  // const hasNoPosition = position.sharesNo > 0;
   const isPositive = position.unrealizedPnL >= 0;
 
   return (
@@ -332,6 +361,71 @@ const PositionCard: FC<PositionCardProps> = ({ position, index }) => {
           </div>
         </div>
       </div>
+    </motion.div>
+  );
+};
+
+// Transaction History Component
+interface TransactionHistoryListProps {
+  transactions: Transaction[];
+}
+
+const TransactionHistoryList: FC<TransactionHistoryListProps> = ({ transactions }) => {
+  return (
+    <motion.div
+      key="history"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className="space-y-3"
+    >
+      {transactions.length === 0 ? (
+        <div className="text-center py-12">
+          <Clock className="w-12 h-12 text-slate-600 mx-auto mb-4" />
+          <p className="text-slate-500 text-sm">No transactions yet</p>
+          <p className="text-slate-600 text-xs mt-1">Your trading activity will appear here</p>
+        </div>
+      ) : (
+        transactions.map((tx, index) => {
+          const Icon = TRANSACTION_ICONS[tx.type] || ArrowRightLeft;
+          const colorClass = TRANSACTION_COLORS[tx.type] || 'text-slate-400';
+          const label = TRANSACTION_LABELS[tx.type] || tx.type;
+          const isPositive = ['WIN_PAYOUT', 'DEPOSIT', 'SELL_YES', 'SELL_NO'].includes(tx.type);
+
+          return (
+            <motion.div
+              key={tx.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className="flex items-center gap-4 p-4 rounded-2xl bg-[#1c2631]/50 border border-white/5"
+            >
+              <div className={`w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center ${colorClass}`}>
+                <Icon className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-white">{label}</p>
+                {tx.marketQuestion && (
+                  <p className="text-xs text-slate-500 truncate">{tx.marketQuestion}</p>
+                )}
+                <p className="text-[10px] text-slate-600">
+                  {new Date(tx.createdAt).toLocaleDateString()} • {new Date(tx.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className={`text-sm font-bold tabular-nums ${isPositive ? 'text-[var(--app-success)]' : 'text-white'}`}>
+                  {isPositive ? '+' : '-'}{formatNumber(Math.abs(tx.amount))} TON
+                </p>
+                {tx.shares && (
+                  <p className="text-[10px] text-slate-500">
+                    {formatNumber(tx.shares)} shares
+                  </p>
+                )}
+              </div>
+            </motion.div>
+          );
+        })
+      )}
     </motion.div>
   );
 };

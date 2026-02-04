@@ -16,15 +16,13 @@ interface AuthenticatedRequest extends FastifyRequest {
 
 /**
  * Validates Telegram WebApp initData
- * In production, this should verify HMAC signature
+ * Verifies HMAC signature with BOT_TOKEN
  */
 export async function authMiddleware(
   request: FastifyRequest,
   reply: FastifyReply
 ): Promise<void> {
   try {
-    // For MVP: Parse initData from header
-    // In production: Verify HMAC signature with BOT_TOKEN
     const initData = request.headers['x-telegram-init-data'] as string;
     
     if (!initData) {
@@ -41,6 +39,21 @@ export async function authMiddleware(
       return;
     }
 
+    // Verify HMAC signature
+    const botToken = process.env.BOT_TOKEN;
+    if (!botToken) {
+      console.error('[Auth] BOT_TOKEN not configured');
+      reply.status(500).send({ error: 'Server configuration error' });
+      return;
+    }
+
+    const isValid = verifyTelegramWebAppData(initData, botToken);
+    if (!isValid) {
+      console.warn('[Auth] Invalid HMAC signature');
+      reply.status(401).send({ error: 'Invalid signature' });
+      return;
+    }
+
     // Parse user data from initData
     const params = new URLSearchParams(initData);
     const userJson = params.get('user');
@@ -51,13 +64,6 @@ export async function authMiddleware(
     }
 
     const userData = JSON.parse(userJson);
-    
-    // TODO: Verify HMAC signature in production
-    // const isValid = verifyTelegramWebAppData(initData, process.env.BOT_TOKEN!);
-    // if (!isValid) {
-    //   reply.status(401).send({ error: 'Invalid signature' });
-    //   return;
-    // }
 
     // Get or create user from database
     const prisma = (request.server as any).prisma;
@@ -87,6 +93,7 @@ export async function authMiddleware(
 
 /**
  * Verify Telegram WebApp data signature
+ * Based on Telegram documentation: https://core.telegram.org/bots/webapps#validating-data-received-via-the-web-app
  */
 function verifyTelegramWebAppData(initData: string, botToken: string): boolean {
   const params = new URLSearchParams(initData);
@@ -96,20 +103,29 @@ function verifyTelegramWebAppData(initData: string, botToken: string): boolean {
   
   params.delete('hash');
   
+  // Sort parameters alphabetically and join with \n
   const dataCheckString = Array.from(params.entries())
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, value]) => `${key}=${value}`)
     .join('\n');
   
+  // Create secret key: HMAC_SHA256("WebAppData", bot_token)
   const secretKey = crypto
     .createHmac('sha256', 'WebAppData')
     .update(botToken)
     .digest();
   
+  // Compute hash: HMAC_SHA256(secret_key, data_check_string)
   const computedHash = crypto
     .createHmac('sha256', secretKey)
     .update(dataCheckString)
     .digest('hex');
   
-  return computedHash === hash;
+  // Constant-time comparison to prevent timing attacks
+  try {
+    return crypto.timingSafeEqual(Buffer.from(computedHash, 'hex'), Buffer.from(hash, 'hex'));
+  } catch {
+    // Buffer lengths mismatch
+    return false;
+  }
 }

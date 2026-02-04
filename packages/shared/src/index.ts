@@ -32,16 +32,49 @@ export class LMSRCalculator {
 
   /**
    * Calculate how many shares a user gets for a given amount of TON
-   * This requires solving for the new Q. For simplicity in MVP, we might use numerical estimation
-   * or a fixed-step approach if the exact inverse is too complex for simple UI.
+   * Uses binary search to solve: C(newQ) - C(oldQ) = amount
+   * This correctly accounts for price slippage in LMSR
    */
-  static estimateShares(amount: number, currentState: MarketState, _isYes: boolean): number {
-    // Simplified version for the document logic provided in Project_map.md
-    // For a more precise version, we'd use a search algorithm for new Q
-    // where calculateCost(newQ) - calculateCost(oldQ) == amount
+  static estimateShares(amount: number, currentState: MarketState, isYes: boolean): number {
+    const { qYes, qNo, b } = currentState;
+    const oldCost = this.calculateCost(currentState);
     
-    // Placeholder for iterative solver or simplified LMSR swap
-    return amount / this.calculatePrice(currentState); 
+    // Binary search for delta Q
+    let low = 0;
+    // Upper bound: with very high liquidity, shares ≈ amount / price
+    // With low liquidity, shares can be much less, so we use a generous upper bound
+    const currentPrice = this.calculatePrice(currentState);
+    const maxSharesEstimate = amount / Math.max(currentPrice, 0.01);
+    let high = maxSharesEstimate * 2;
+    let shares = 0;
+    
+    const MAX_ITERATIONS = 50;
+    const PRECISION = 0.0001; // 0.01% precision
+    
+    for (let i = 0; i < MAX_ITERATIONS; i++) {
+      const mid = (low + high) / 2;
+      const testState: MarketState = {
+        qYes: isYes ? qYes + mid : qYes,
+        qNo: !isYes ? qNo + mid : qNo,
+        b,
+      };
+      const newCost = this.calculateCost(testState);
+      const costDiff = newCost - oldCost;
+      
+      if (Math.abs(costDiff - amount) < PRECISION) {
+        shares = mid;
+        break;
+      }
+      
+      if (costDiff < amount) {
+        shares = mid;
+        low = mid;
+      } else {
+        high = mid;
+      }
+    }
+    
+    return shares;
   }
 }
 

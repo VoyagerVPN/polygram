@@ -2,6 +2,7 @@ import { BotService } from './bot.service.js';
 import { NewsService } from './news.service.js';
 import { AiService } from './ai.service.js';
 import { MarketService } from '../modules/market/market.service.js';
+import { AUTOMATION_CONFIG } from '../core/constants.js';
 
 export class AutomationService {
   private intervalId?: NodeJS.Timeout;
@@ -19,7 +20,7 @@ export class AutomationService {
     // 8 hours interval to stay within 100 req/month limit (CryptoPanic)
     this.intervalId = setInterval(() => {
       this.processCycle();
-    }, 8 * 60 * 60 * 1000);
+    }, AUTOMATION_CONFIG.CYCLE_INTERVAL_MS);
     
     return true;
   }

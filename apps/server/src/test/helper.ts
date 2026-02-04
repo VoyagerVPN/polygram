@@ -1,9 +1,12 @@
 import Fastify from 'fastify';
 import type { FastifyInstance } from 'fastify';
 import { vi } from 'vitest';
+import type { PrismaClient } from '@prisma/client';
 import { MarketModule } from '../modules/market/market.module.js';
 import TradeModule from '../modules/trading/trade.module.js';
 import { UserModule } from '../modules/user/user.module.js';
+import { UserService } from '../modules/user/user.service.js';
+import { AuthService } from '../modules/user/auth.service.js';
 
 // Create mock Prisma client
 function createMockPrisma() {
@@ -31,8 +34,8 @@ function createMockPrisma() {
       findUnique: vi.fn(),
       upsert: vi.fn(),
     },
-    $transaction: vi.fn((callback: any) => callback({})),
-  } as any;
+    $transaction: vi.fn(<T>(callback: (tx: unknown) => T) => callback({})),
+  } as unknown as PrismaClient;
 }
 
 // Create mock UserService
@@ -44,7 +47,7 @@ function createMockUserService() {
       tonAddress: 'test-address'
     }),
     getProfile: vi.fn().mockResolvedValue(null),
-  } as any;
+  } as unknown as UserService;
 }
 
 // Create mock AuthService
@@ -52,7 +55,7 @@ function createMockAuthService() {
   return {
     generatePayload: vi.fn().mockResolvedValue('test-payload'),
     verifyProof: vi.fn().mockResolvedValue(true),
-  } as any;
+  } as unknown as AuthService;
 }
 
 // Test helper to create a fastify instance without starting the server
@@ -73,11 +76,11 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(MarketModule, { 
     prefix: '/api/markets',
     prisma: mockPrisma,
-    service: { trade: vi.fn() } as any,
+    service: { trade: vi.fn() } as unknown as import('../modules/market/market.service.js').MarketService,
   });
 
   await app.register(TradeModule, { 
-    prefix: '/api/trading',
+    prefix: '/api/trades',
     prisma: mockPrisma,
   });
 

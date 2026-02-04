@@ -105,5 +105,6 @@ model Transaction {
   market      Market?         @relation(fields: [marketId], references: [id])
   price       Float?          // Цена при сделке
   shares      Float?          // Количество shares
+  txHash      String?         @unique // TON transaction hash для idempotency депозитов
   createdAt   DateTime        @default(now())
 }
