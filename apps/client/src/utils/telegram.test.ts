@@ -6,7 +6,6 @@ import {
   ready,
   expand,
   close,
-  type TelegramUser,
 } from './telegram';
 
 describe('Telegram Utilities', () => {
@@ -48,8 +47,7 @@ describe('Telegram Utilities', () => {
 
     it('should return empty string when not in Telegram', () => {
       const originalTg = window.Telegram;
-      // @ts-expect-error - testing undefined case
-      window.Telegram = undefined;
+      (window as any).Telegram = undefined;
 
       const initData = getInitData();
       expect(initData).toBe('');
@@ -65,8 +63,7 @@ describe('Telegram Utilities', () => {
 
     it('should return false when Telegram WebApp is not available', () => {
       const originalTg = window.Telegram;
-      // @ts-expect-error - testing undefined case
-      window.Telegram = undefined;
+      (window as any).Telegram = undefined;
 
       expect(isTelegramWebApp()).toBe(false);
 

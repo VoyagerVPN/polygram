@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { LMSRCalculator, MarketState, DEFAULT_LIQUIDITY_B } from '../../../shared/src/index.js';
+import { LMSRCalculator, MarketState, DEFAULT_LIQUIDITY_B } from '@polygram/shared';
 
 describe('LMSR Calculator', () => {
   const createState = (qYes: number, qNo: number, b: number = DEFAULT_LIQUIDITY_B): MarketState => ({

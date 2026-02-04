@@ -1,5 +1,6 @@
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
+import { vi, afterEach } from 'vitest';
+import { cleanup } from '@testing-library/react';
 
 // Mock environment variables
 Object.defineProperty(import.meta, 'env', {
@@ -77,7 +78,6 @@ Object.defineProperty(window, 'localStorage', {
 });
 
 // Cleanup after each test
-import { cleanup } from '@testing-library/react';
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
