@@ -10,6 +10,13 @@ export default defineConfig({
     include: ['src/**/*.{test,spec}.{js,ts,tsx}'],
     exclude: ['node_modules', 'dist'],
     setupFiles: ['./src/test/setup.ts'],
+    // Ensure jsdom is used for DOM APIs
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        execArgv: ['--experimental-vm-modules'],
+      },
+    },
     coverage: {
       reporter: ['text', 'json', 'html'],
       exclude: ['node_modules/', 'dist/', 'src/test/', '**/*.d.ts'],
