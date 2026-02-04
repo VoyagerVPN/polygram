@@ -39,3 +39,6 @@ apps/server/src/infrastructure/prisma/
 PRISMA_DEPLOYMENT_ERROR.md
 AGENTS.md
 .temp/
+
+# Test coverage
+coverage/
