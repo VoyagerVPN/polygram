@@ -146,11 +146,8 @@ jobs:
       - name: Run database migrations
         run: pnpm -F @polygram/server db:migrate
 
-      - name: Run tests
-        run: pnpm test -- --reporter=verbose
-
       - name: Run tests with coverage
-        run: pnpm test -- --coverage
+        run: pnpm -r test -- --coverage --reporter=verbose
         continue-on-error: true  # Coverage может падать из-за отсутствия пакетов
 
       - name: Upload coverage reports

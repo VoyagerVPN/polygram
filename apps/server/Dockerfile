@@ -40,12 +40,11 @@ COPY apps/server/package.json apps/server/
 # Install production dependencies only
 RUN pnpm install --frozen-lockfile --prod
 
-# Copy built files
+# Copy built files and generated prisma client
 COPY --from=builder /app/packages/shared/dist/ packages/shared/dist/
 COPY --from=builder /app/apps/server/dist/ apps/server/dist/
 COPY --from=builder /app/apps/server/prisma/ apps/server/prisma/
-COPY --from=builder /app/node_modules/.pnpm/@prisma+client* node_modules/.pnpm/
-COPY --from=builder /app/node_modules/.bin/prisma node_modules/.bin/
+COPY --from=builder /app/node_modules/.prisma/ node_modules/.prisma/
 
 # Expose port
 EXPOSE 3000
