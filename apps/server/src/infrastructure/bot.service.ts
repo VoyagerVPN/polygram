@@ -1,5 +1,5 @@
 import { Telegraf, Markup, Context } from 'telegraf';
-import { MarketService, MarketData } from '../modules/market/market.service.js';
+import { MarketService } from '../modules/market/market.service.js';
 import { NewsService } from './news.service.js';
 import { AiService } from './ai.service.js';
 import { AutomationService } from './automation.service.js';
@@ -232,7 +232,7 @@ export class BotService {
     });
 
     this.bot.action(/reject_(.*)/, async (ctx) => {
-      const marketId = ctx.match[1];
+      // const marketId = ctx.match[1]; // Reserved for future use
       // Set status to CLOSED or just leave it PENDING
       await ctx.editMessageText('❌ Предложение рынка отклонено.');
     });

@@ -139,7 +139,7 @@ await fastify.register(rateLimit, {
 });
 
 // WebSocket Route
-fastify.get('/ws', { websocket: true }, (socket, req) => {
+fastify.get('/ws', { websocket: true }, (socket, _req) => {
   console.log('[WS] Client connected');
   WsService.registerClient(socket);
 });
@@ -167,7 +167,7 @@ await fastify.register(UserModule, {
 });
 
 // Register authenticated modules
-await fastify.register(async (instance, opts) => {
+await fastify.register(async (instance, _opts) => {
   // Add auth middleware to all routes in this prefix
   instance.addHook('preHandler', authMiddleware);
   

@@ -146,6 +146,9 @@ jobs:
       - name: Run database migrations
         run: pnpm -F @polygram/server db:migrate
 
+      - name: Build shared package
+        run: pnpm -F @polygram/shared build
+
       - name: Run tests with coverage
         run: pnpm -r test -- --coverage --reporter=verbose
         continue-on-error: true  # Coverage может падать из-за отсутствия пакетов
@@ -195,6 +198,9 @@ jobs:
       - name: Generate Prisma Client
         if: matrix.app == 'server'
         run: pnpm -F @polygram/server db:generate
+
+      - name: Build @polygram/shared
+        run: pnpm -F @polygram/shared build
 
       - name: Build @polygram/${{ matrix.app }}
         run: pnpm -F @polygram/${{ matrix.app }} build

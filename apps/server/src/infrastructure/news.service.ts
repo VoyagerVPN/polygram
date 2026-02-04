@@ -1,4 +1,3 @@
-import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
 import { CACHE_CONFIG, NEWS_CONFIG } from '../core/constants.js';

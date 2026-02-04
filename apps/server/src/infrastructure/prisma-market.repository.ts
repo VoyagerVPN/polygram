@@ -1,7 +1,4 @@
-import pkg from './prisma/index.js';
-const { PrismaClient, MarketStatus } = pkg;
 import type { Market, PrismaClient as IPrismaClient, MarketStatus as IMarketStatus } from './prisma/index.js';
-import { PRICE_HISTORY_CONFIG } from '../core/constants.js';
 import { MarketState } from '@polygram/shared';
 import { IMarketRepository, MarketData } from '../modules/market/market.service.js';
 import { MarketProposal } from '../infrastructure/ai.service.js';

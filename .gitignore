@@ -38,3 +38,4 @@ apps/server/src/infrastructure/prisma/
 # Temporary/Documentation files
 PRISMA_DEPLOYMENT_ERROR.md
 AGENTS.md
+.temp/

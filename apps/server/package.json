@@ -10,7 +10,7 @@
     "start": "node dist/index.js",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
-    "lint": "eslint src",
+    "lint": "eslint src --ignore-pattern src/infrastructure/prisma",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy"
   },
