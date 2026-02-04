@@ -5,6 +5,8 @@ FROM node:22-alpine AS builder
 RUN npm install -g pnpm@10
 ENV CI=true
 # Prisma 7 uses WASM by default, no native engines needed
+# Dummy DATABASE_URL is required for Prisma 7 config validation during 'prisma generate'
+ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/unused"
 
 WORKDIR /app
 
