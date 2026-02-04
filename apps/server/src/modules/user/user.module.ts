@@ -8,6 +8,15 @@ import { AuthService } from './auth.service.js';
 // Temporary store for payloads (in production use Redis)
 const payloadStore = new Map<string, string>();
 
+import { TonProofPayload } from './auth.service.js';
+
+interface AuthVerifyBody {
+  payload: TonProofPayload;
+  tempId: string;
+  telegramId: string;
+  username: string;
+}
+
 export async function UserModule(fastify: FastifyInstance, options: { service: UserService, auth: AuthService }) {
   const { service, auth } = options;
 
@@ -25,8 +34,8 @@ export async function UserModule(fastify: FastifyInstance, options: { service: U
   /**
    * 2. Verify TON Proof and Login
    */
-  fastify.post('/auth/verify', async (request, reply) => {
-    const { payload, tempId, telegramId, username } = request.body as any;
+  fastify.post<{ Body: AuthVerifyBody }>('/auth/verify', async (request, reply) => {
+    const { payload, tempId, telegramId, username } = request.body;
 
     const expectedPayload = payloadStore.get(tempId);
     if (!expectedPayload) {
@@ -61,8 +70,8 @@ export async function UserModule(fastify: FastifyInstance, options: { service: U
   /**
    * 3. Get User Profile
    */
-  fastify.get('/profile/:id', async (request, reply) => {
-    const { id } = request.params as { id: string };
+  fastify.get<{ Params: { id: string } }>('/profile/:id', async (request, reply) => {
+    const { id } = request.params;
     const profile = await service.getProfile(id);
     if (!profile) return reply.status(404).send({ error: 'User not found' });
     
@@ -73,9 +82,9 @@ export async function UserModule(fastify: FastifyInstance, options: { service: U
    * 4. Get Leaderboard (Top traders by balance + realized PnL)
    * Query params: period (all_time, weekly, daily) - currently supports all_time only
    */
-  fastify.get('/leaderboard', async (request, reply) => {
+  fastify.get<{ Querystring: { period?: string } }>('/leaderboard', async (request, reply) => {
     try {
-      const { period = 'all_time' } = request.query as { period?: string };
+      const { period = 'all_time' } = request.query;
       
       // Get top 20 users by balance
       const topUsers = await service.getLeaderboard(period, 20);

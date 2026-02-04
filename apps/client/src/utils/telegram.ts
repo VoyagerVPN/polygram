@@ -1,6 +1,16 @@
 /**
  * Telegram WebApp utilities
+ * Uses @telegram-apps/sdk-react for all Telegram Mini Apps interactions
  */
+
+import {
+  initDataUser,
+  initDataRaw,
+  miniAppReady,
+  expandViewport,
+  closeMiniApp,
+  isMiniAppSupported,
+} from '@telegram-apps/sdk-react';
 
 export interface TelegramUser {
   id: number;
@@ -11,27 +21,47 @@ export interface TelegramUser {
 }
 
 export function getTelegramUser(): TelegramUser | null {
-  const tg = window.Telegram?.WebApp;
-  if (!tg?.initDataUnsafe?.user) return null;
-  return tg.initDataUnsafe.user as TelegramUser;
+  const user = initDataUser();
+  if (!user) return null;
+  return {
+    id: user.id,
+    first_name: user.first_name,
+    last_name: user.last_name,
+    username: user.username,
+    language_code: user.language_code,
+  };
 }
 
 export function getInitData(): string {
-  return window.Telegram?.WebApp?.initData || '';
+  return initDataRaw() ?? '';
 }
 
 export function isTelegramWebApp(): boolean {
-  return !!window.Telegram?.WebApp;
+  return isMiniAppSupported();
 }
 
 export function ready(): void {
-  window.Telegram?.WebApp?.ready();
+  if (isMiniAppSupported()) {
+    miniAppReady();
+  }
 }
 
 export function expand(): void {
-  window.Telegram?.WebApp?.expand();
+  // Only expand if Mini App is supported and mounted
+  // This prevents errors in test environment
+  try {
+    expandViewport();
+  } catch {
+    // Silently ignore errors in non-Telegram environments
+  }
 }
 
 export function close(): void {
-  window.Telegram?.WebApp?.close();
+  // Only close if Mini App is supported
+  // This prevents errors in test environment
+  try {
+    closeMiniApp();
+  } catch {
+    // Silently ignore errors in non-Telegram environments
+  }
 }

@@ -1,15 +1,20 @@
 import {
   setDebug,
-  themeParams,
-  initData,
-  viewport,
+  mountThemeParams,
+  bindThemeParamsCssVars,
+  restoreInitData,
+  mountViewport,
+  bindViewportCssVars,
   init as initSDK,
   mockTelegramEnv,
   retrieveLaunchParams,
   emitEvent,
-  miniApp,
-  backButton,
-} from '@tma.js/sdk-react';
+  mountMiniApp,
+  bindMiniAppCssVars,
+  mountBackButton,
+  isMiniAppSupported,
+  miniAppReady,
+} from '@telegram-apps/sdk-react';
 
 /**
  * Initializes the application and configures its dependencies.
@@ -24,10 +29,12 @@ export async function init(options: {
   initSDK();
 
   // Add Eruda if needed.
-  options.eruda && void import('eruda').then(({ default: eruda }) => {
-    eruda.init();
-    eruda.position({ x: window.innerWidth - 50, y: 0 });
-  });
+  if (options.eruda) {
+    void import('eruda').then(({ default: eruda }) => {
+      eruda.init();
+      eruda.position({ x: window.innerWidth - 50, y: 0 });
+    });
+  }
 
   // Telegram for macOS has a ton of bugs, including cases, when the client doesn't
   // even response to the "web_app_request_theme" method. It also generates an incorrect
@@ -35,40 +42,38 @@ export async function init(options: {
   if (options.mockForMacOS) {
     let firstThemeSent = false;
     mockTelegramEnv({
-      onEvent(event, next) {
-        if (event.name === 'web_app_request_theme') {
-          let tp: Record<string, string | undefined> = {};
-          if (firstThemeSent) {
-            tp = themeParams.state();
-          } else {
-            firstThemeSent = true;
-            tp ||= retrieveLaunchParams().tgWebAppThemeParams;
-          }
-          return emitEvent('theme_changed', { theme_params: tp as Record<string, `#${string}` | undefined> });
+      onEvent(event) {
+        const [methodName] = event;
+
+        if (methodName === 'web_app_request_theme') {
+          const themeParams = firstThemeSent
+            ? undefined
+            : retrieveLaunchParams().tgWebAppThemeParams;
+          firstThemeSent = true;
+          emitEvent('theme_changed', { theme_params: themeParams ?? {} });
+          return;
         }
 
-        if (event.name === 'web_app_request_safe_area') {
-          return emitEvent('safe_area_changed', { left: 0, top: 0, right: 0, bottom: 0 });
+        if (methodName === 'web_app_request_safe_area') {
+          emitEvent('safe_area_changed', { left: 0, top: 0, right: 0, bottom: 0 });
+          return;
         }
-
-        next();
       },
     });
   }
 
   // Mount all components used in the project.
-  backButton.mount.ifAvailable();
-  initData.restore();
+  mountBackButton();
+  restoreInitData();
 
-  if (miniApp.mount.isAvailable()) {
-    themeParams.mount();
-    miniApp.mount();
-    themeParams.bindCssVars();
+  if (isMiniAppSupported()) {
+    mountMiniApp();
+    mountThemeParams();
+    bindThemeParamsCssVars();
+    bindMiniAppCssVars();
+    miniAppReady();
   }
 
-  if (viewport.mount.isAvailable()) {
-    viewport.mount().then(() => {
-      viewport.bindCssVars();
-    });
-  }
+  await mountViewport();
+  bindViewportCssVars();
 }

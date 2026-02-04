@@ -4,6 +4,7 @@ FROM node:22-alpine AS builder
 # Install pnpm
 RUN npm install -g pnpm@10
 ENV CI=true
+# ENV PRISMA_CLIENT_ENGINE_TYPE=library
 
 WORKDIR /app
 
@@ -27,6 +28,7 @@ RUN pnpm --filter @polygram/server deploy --legacy --prod /isolated
 # Production stage
 FROM node:22-alpine AS production
 RUN apk add --no-cache openssl
+# ENV PRISMA_CLIENT_ENGINE_TYPE=library
 WORKDIR /app
 
 # Copy the isolated package package.json and node_modules
@@ -39,6 +41,12 @@ COPY --from=builder /app/packages/shared/dist ./node_modules/@polygram/shared/di
 
 # Expose port
 EXPOSE 3000
+
+# Entrypoint script for migrations and setup
+COPY apps/server/docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["docker-entrypoint.sh"]
 
 # Start the server
 CMD ["node", "dist/apps/server/src/index.js"]

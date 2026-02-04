@@ -79,3 +79,24 @@ export class LMSRCalculator {
 }
 
 export const DEFAULT_LIQUIDITY_B = 150;
+
+/**
+ * Shared Utils for SOLID/DRY compliance
+ */
+
+export const safeBigInt = (value: string | number | undefined | null): bigint | null => {
+  if (value === undefined || value === null) return null;
+  try {
+    return BigInt(value);
+  } catch {
+    return null;
+  }
+};
+
+export interface SharedUser {
+  id: string;
+  telegramId: bigint;
+  username?: string;
+  tonAddress?: string;
+  balance: number;
+}

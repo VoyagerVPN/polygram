@@ -25,15 +25,7 @@ export default async function PortfolioModule(
   const controller = new PortfolioController(service);
 
   // Routes
-  fastify.get('/', async (request, reply) => {
-    await controller.getPortfolio(request, reply);
-  });
-
-  fastify.get('/positions', async (request, reply) => {
-    await controller.getPositions(request, reply);
-  });
-
-  fastify.get('/transactions', async (request, reply) => {
-    await controller.getTransactions(request, reply);
-  });
+  fastify.get('/', controller.getPortfolio.bind(controller));
+  fastify.get('/positions', controller.getPositions.bind(controller));
+  fastify.get('/transactions', controller.getTransactions.bind(controller));
 }

@@ -3,6 +3,8 @@
  * Following SOLID: Single Responsibility - handles HTTP communication only
  */
 
+import { initDataRaw } from '@telegram-apps/sdk-react';
+
 import { API_BASE_URL } from '@/constants';
 import type { 
   MarketsResponse, 
@@ -27,8 +29,8 @@ class APIError extends Error {
 }
 
 async function fetchJSON<T>(url: string, options?: RequestInit): Promise<T> {
-  // Get init data from Telegram WebApp
-  const initData = window.Telegram?.WebApp?.initData || '';
+  // Get init data from Telegram WebApp SDK
+  const initData = initDataRaw() ?? '';
   
   const response = await fetch(url, {
     headers: {

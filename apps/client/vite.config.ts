@@ -7,43 +7,26 @@ import tsconfigPaths from 'vite-tsconfig-paths';
 export default defineConfig({
   base: '/',
   css: {
-    preprocessorOptions: {
-      scss: {
-        api: 'modern',
-      },
-    },
+    // PostCSS is required for Tailwind 3 compatibility
+    // lightningcss minification is still enabled below in build.cssMinify
   },
   plugins: [
-    // Allows using React dev server along with building a React application with Vite.
-    // https://npmjs.com/package/@vitejs/plugin-react-swc
     react(),
-    // Allows using the compilerOptions.paths property in tsconfig.json.
-    // https://www.npmjs.com/package/vite-tsconfig-paths
     tsconfigPaths(),
-    // Creates a custom SSL certificate valid for the local machine.
-    // Using this plugin requires admin rights on the first dev-mode launch.
-    // https://www.npmjs.com/package/vite-plugin-mkcert
     process.env.HTTPS && mkcert(),
   ],
   build: {
     target: 'esnext',
     minify: 'terser',
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          // Separate vendor libraries
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-telegram': ['@tma.js/sdk-react', '@telegram-apps/telegram-ui'],
-          'vendor-ui': ['framer-motion', 'lucide-react'],
-          'vendor-charts': ['lightweight-charts'],
-        },
-      },
-    },
-    chunkSizeWarningLimit: 1000, // Increase limit to 1000KB
+    cssMinify: 'lightningcss',
+    chunkSizeWarningLimit: 1000,
+  },
+  future: {
+    // Enable Vite 7 future breaking changes for better diagnostics
+    // (Actual list depends on the specific Vite 7 version)
   },
   publicDir: './public',
   server: {
-    // Exposes your dev server and makes it accessible for the devices in the same network.
     host: true,
   },
 });

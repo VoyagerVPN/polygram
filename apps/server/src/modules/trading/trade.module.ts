@@ -27,14 +27,6 @@ export default async function TradeModule(
   const controller = new TradeController(service);
 
   // Routes
-  fastify.post('/', async (request, reply) => {
-    await controller.executeTrade(request, reply);
-  });
-
-  fastify.get('/estimate', async (request, reply) => {
-    await controller.estimateTrade(
-      request as Parameters<typeof controller.estimateTrade>[0],
-      reply
-    );
-  });
+  fastify.post('/', controller.executeTrade.bind(controller));
+  fastify.get('/estimate', controller.estimateTrade.bind(controller));
 }

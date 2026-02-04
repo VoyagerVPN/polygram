@@ -46,7 +46,7 @@ export class BotService {
         '/autostatus - Статус авто-генерации\n' +
         '/fetchnews - Получить новости\n' +
         '/markets - Список активных рынков\n' +
-        '/mock_deposit <userId> <amount> - Симулировать депозит (admin only)',
+        '`/mock_deposit <userId> <amount>` - Симулировать депозит (admin only)',
         { parse_mode: 'Markdown' }
       );
     });
@@ -181,22 +181,22 @@ export class BotService {
     this.bot.command('mock_deposit', async (ctx) => {
       this.logCommand(ctx, 'mock_deposit');
       
-      // Check admin access
       const adminId = process.env.ADMIN_CHAT_ID;
-      const userId = ctx.from?.id.toString();
-      if (!adminId || userId !== adminId) {
+      if (!adminId || ctx.from?.id.toString() !== adminId) {
         return ctx.reply('❌ Эта команда доступна только администратору');
       }
 
-      // Check mock service availability
       if (!this.mockTonService) {
-        return ctx.reply('❌ Mock TON сервис не доступен. Убедитесь что USE_MOCK_TON=true');
+        return ctx.reply('❌ Mock TON сервис не доступен. Убедитесь что `USE_MOCK_TON=true`', { parse_mode: 'Markdown' });
       }
 
-      // Parse arguments
       const args = ctx.message.text.split(' ').slice(1);
       if (args.length !== 2) {
-        return ctx.reply('❌ Использование: /mock_deposit <userId> <amount>\nПример: /mock_deposit abc123 100');
+        return ctx.reply(
+          '❌ Использование: `/mock_deposit <userId> <amount>`\n' +
+          'Пример: `/mock_deposit abc123 100`',
+          { parse_mode: 'Markdown' }
+        );
       }
 
       const [targetUserId, amountStr] = args;
@@ -207,19 +207,18 @@ export class BotService {
       }
 
       try {
-        await ctx.reply(`💰 Симулирую депозит ${amount} TON для пользователя ${targetUserId}...`);
+        await ctx.reply(`💰 Симулирую депозит \`${amount}\` TON для пользователя \`${targetUserId}\`...`, { parse_mode: 'Markdown' });
         const txHash = await this.mockTonService.simulateDeposit(targetUserId, amount);
         
         ctx.reply(
           `✅ *Депозит успешно обработан!*\n\n` +
-          `👤 Пользователь: ${targetUserId}\n` +
-          `💵 Сумма: ${amount} TON\n` +
+          `👤 Пользователь: \`${targetUserId}\`\n` +
+          `💵 Сумма: \`${amount}\` TON\n` +
           `🔗 Транзакция: \`${txHash}\``,
           { parse_mode: 'Markdown' }
         );
       } catch (err) {
-        this.logCommand(ctx, 'mock_deposit', err instanceof Error ? err : new Error(String(err)));
-        ctx.reply('🔥 Ошибка при обработке депозита: ' + (err instanceof Error ? err.message : String(err)));
+        ctx.reply('🔥 Ошибка симуляции: ' + (err instanceof Error ? err.message : String(err)));
       }
     });
   }

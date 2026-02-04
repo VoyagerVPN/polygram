@@ -208,5 +208,5 @@ file according to your project's information.
 ## Useful Links
 
 - [Platform documentation](https://docs.telegram-mini-apps.com/)
-- [@tma.js/sdk-react documentation](https://docs.telegram-mini-apps.com/packages/tma-js-sdk-react)
+- [@telegram-apps/sdk-react documentation](https://docs.telegram-mini-apps.com/packages/telegram-apps-sdk-react/3-x)
 - [Telegram developers community chat](https://t.me/devs_cis)

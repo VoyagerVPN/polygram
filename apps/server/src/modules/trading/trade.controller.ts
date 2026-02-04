@@ -7,27 +7,21 @@ import { FastifyRequest, FastifyReply } from 'fastify';
 import { ITradeService, InsufficientBalanceError, MarketNotFoundError, InvalidTradeError } from './trade.service.js';
 import { TradeSchema, TradeRequest } from './trade.dto.js';
 import { ZodError } from 'zod';
-
-interface AuthenticatedRequest extends FastifyRequest {
-  user?: {
-    id: string;
-  };
-}
+import '../user/auth.middleware.js'; // Ensure module augmentation is loaded
 
 export class TradeController {
   constructor(private tradeService: ITradeService) {}
 
   async executeTrade(
-    request: FastifyRequest,
+    request: FastifyRequest<{ Body: TradeRequest }>,
     reply: FastifyReply
   ): Promise<void> {
     try {
       // Validate input
-      const body = request.body as TradeRequest;
-      const validated = TradeSchema.parse(body);
+      const validated = TradeSchema.parse(request.body);
       
       // Get user from auth context (set by auth middleware)
-      const userId = (request as AuthenticatedRequest).user?.id;
+      const userId = request.user?.id;
       if (!userId) {
         reply.status(401).send({ error: 'Unauthorized' });
         return;
@@ -52,16 +46,15 @@ export class TradeController {
   }
 
   async estimateTrade(
-    request: FastifyRequest,
+    request: FastifyRequest<{ Querystring: { 
+      marketId: string; 
+      amount: string; 
+      outcome: 'YES' | 'NO';
+    }}>,
     reply: FastifyReply
   ): Promise<void> {
     try {
-      const query = request.query as { 
-        marketId: string; 
-        amount: string; 
-        outcome: 'YES' | 'NO';
-      };
-      const { marketId, amount, outcome } = query;
+      const { marketId, amount, outcome } = request.query;
       const amountNum = parseFloat(amount);
 
       if (isNaN(amountNum) || amountNum <= 0) {

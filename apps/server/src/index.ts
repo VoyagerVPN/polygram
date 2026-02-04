@@ -9,8 +9,9 @@ import { MarketModule } from './modules/market/market.module.js';
 import { BotService } from './infrastructure/bot.service.js';
 import { MarketService } from './modules/market/market.service.js';
 import { PrismaMarketRepository } from './infrastructure/prisma-market.repository.js';
-import pkg from './infrastructure/prisma/index.js';
-const { PrismaClient } = pkg;
+import { PrismaClient } from './infrastructure/prisma/index.js';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
 import { NewsService } from './infrastructure/news.service.js';
 import { AiService } from './infrastructure/ai.service.js';
 import { AutomationService } from './infrastructure/automation.service.js';
@@ -65,7 +66,13 @@ fastify.get('/', async () => {
 });
 
 // Setup DI Layer
-const prisma = new PrismaClient();
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
+const prisma = new PrismaClient({ adapter });
+
+// Decorate fastify with prisma for global access (DRY)
+fastify.decorate('prisma', prisma);
+
 const repository = new PrismaMarketRepository(prisma);
 const userService = new UserServiceImpl(prisma);
 const marketService = new MarketService(repository, userService);

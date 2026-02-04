@@ -1,22 +1,25 @@
-import { Placeholder, AppRoot } from '@telegram-apps/telegram-ui';
-import { retrieveLaunchParams, isColorDark, isRGB } from '@tma.js/sdk-react';
+import { Placeholder } from '@telegram-apps/telegram-ui';
+import { retrieveLaunchParams, isColorDark, isRGB } from '@telegram-apps/sdk-react';
 import { useMemo } from 'react';
 
 export function EnvUnsupported() {
-  const [platform, isDark] = useMemo(() => {
+  const [isDark] = useMemo(() => {
     try {
       const lp = retrieveLaunchParams();
-      const { bg_color: bgColor } = lp.tgWebAppThemeParams;
-      return [lp.tgWebAppPlatform, bgColor && isRGB(bgColor) ? isColorDark(bgColor) : false];
+      const { tgWebAppThemeParams: themeParams } = lp;
+      const bgColor = themeParams?.bg_color;
+      return [
+        bgColor && isRGB(bgColor) ? isColorDark(bgColor) : false,
+      ];
     } catch {
-      return ['android', false];
+      return [false];
     }
   }, []);
 
   return (
-    <AppRoot
-      appearance={isDark ? 'dark' : 'light'}
-      platform={['macos', 'ios'].includes(platform) ? 'ios' : 'base'}
+    <div
+      className={isDark ? 'dark' : 'light'}
+      style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'var(--tg-theme-bg-color, #0b0e11)' }}
     >
       <Placeholder
         header="Oops"
@@ -28,6 +31,6 @@ export function EnvUnsupported() {
           style={{ display: 'block', width: '144px', height: '144px' }}
         />
       </Placeholder>
-    </AppRoot>
+    </div>
   );
 }

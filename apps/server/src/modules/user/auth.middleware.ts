@@ -3,15 +3,23 @@
  * Validates Telegram WebApp initData
  */
 
-import { FastifyRequest, FastifyReply, HookHandlerDoneFunction } from 'fastify';
+import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
 import crypto from 'crypto';
+import pkg from '../../infrastructure/prisma/index.js';
+const { PrismaClient } = pkg;
 
-interface AuthenticatedRequest extends FastifyRequest {
-  user: {
-    id: string;
-    telegramId: bigint;
-    username?: string;
-  };
+// Module augmentation for Fastify decoration
+declare module 'fastify' {
+  interface FastifyInstance {
+    prisma: InstanceType<typeof PrismaClient>;
+  }
+  interface FastifyRequest {
+    user: {
+      id: string;
+      telegramId: bigint;
+      username?: string;
+    };
+  }
 }
 
 /**
@@ -28,7 +36,7 @@ export async function authMiddleware(
     if (!initData) {
       // For development, allow mock user
       if (process.env.NODE_ENV === 'development') {
-        (request as AuthenticatedRequest).user = {
+        request.user = {
           id: 'mock-user-id',
           telegramId: BigInt(123456789),
           username: 'dev_user',
@@ -66,7 +74,7 @@ export async function authMiddleware(
     const userData = JSON.parse(userJson);
 
     // Get or create user from database
-    const prisma = (request.server as any).prisma;
+    const prisma = request.server.prisma;
     let user = await prisma.user.findUnique({
       where: { telegramId: BigInt(userData.id) },
     });
@@ -80,7 +88,7 @@ export async function authMiddleware(
       });
     }
 
-    (request as AuthenticatedRequest).user = {
+    request.user = {
       id: user.id,
       telegramId: user.telegramId,
       username: user.username || undefined,

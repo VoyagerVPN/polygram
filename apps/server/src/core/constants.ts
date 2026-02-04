@@ -35,12 +35,6 @@ export const AUTOMATION_CONFIG = {
   CYCLE_INTERVAL_MS: 8 * 60 * 60 * 1000, // 8 hours
 } as const;
 
-// Rate Limiting Configuration
-export const RATE_LIMIT_CONFIG = {
-  MAX_REQUESTS_PER_MINUTE: 100,
-  TIME_WINDOW: '1 minute',
-} as const;
-
 // Authentication Configuration
 export const AUTH_CONFIG = {
   PAYLOAD_EXPIRY_SECONDS: 600, // 10 minutes
@@ -55,12 +49,6 @@ export const CACHE_CONFIG = {
 // News Service Configuration
 export const NEWS_CONFIG = {
   FETCH_TIMEOUT_MS: 10000, // 10 seconds timeout for API calls
-} as const;
-
-// WebSocket Configuration
-export const WS_CONFIG = {
-  RECONNECT_DELAY_MS: 5000,
-  MAX_RECONNECT_ATTEMPTS: 5,
 } as const;
 
 // Price History Configuration

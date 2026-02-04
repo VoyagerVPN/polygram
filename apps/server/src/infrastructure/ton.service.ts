@@ -68,7 +68,7 @@ export class TonService implements ITonService {
    * Handle deposit with idempotency check
    * @returns true if deposit was processed, false if already existed
    */
-  private async handleDeposit(userId: string, amount: number, txHash: string): Promise<boolean> {
+  protected async handleDeposit(userId: string, amount: number, txHash: string): Promise<boolean> {
     try {
       // 1. Check if this transaction was already processed (idempotency)
       const existingTx = await this.prisma.transaction.findUnique({

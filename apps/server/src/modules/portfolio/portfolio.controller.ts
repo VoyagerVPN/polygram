@@ -5,19 +5,14 @@
 
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { IPortfolioService } from './portfolio.service.js';
-
-interface AuthenticatedRequest extends FastifyRequest {
-  user: {
-    id: string;
-  };
-}
+import '../user/auth.middleware.js'; // Ensure module augmentation is loaded
 
 export class PortfolioController {
   constructor(private service: IPortfolioService) {}
 
   async getPortfolio(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
-      const userId = (request as AuthenticatedRequest).user.id;
+      const userId = request.user.id;
       const data = await this.service.getPortfolioData(userId);
       reply.status(200).send(data);
     } catch (error) {
@@ -28,7 +23,7 @@ export class PortfolioController {
 
   async getPositions(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
-      const userId = (request as AuthenticatedRequest).user.id;
+      const userId = request.user.id;
       const positions = await this.service.getPositions(userId);
       reply.status(200).send(positions);
     } catch (error) {
@@ -39,7 +34,7 @@ export class PortfolioController {
 
   async getTransactions(request: FastifyRequest, reply: FastifyReply): Promise<void> {
     try {
-      const userId = (request as AuthenticatedRequest).user.id;
+      const userId = request.user.id;
       const transactions = await this.service.getTransactions(userId);
       reply.status(200).send(transactions);
     } catch (error) {

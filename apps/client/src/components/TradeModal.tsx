@@ -4,7 +4,7 @@
  */
 
 import type { FC } from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useOptimistic, startTransition } from 'react';
 import { motion } from 'framer-motion';
 import { X, TrendingUp, TrendingDown, AlertCircle, Check } from 'lucide-react';
 import { usePolygramStore } from '@/store/usePolygramStore';
@@ -31,6 +31,13 @@ export const TradeModal: FC<TradeModalProps> = ({
   const { userBalance, setBalance } = usePolygramStore();
   const [amount, setAmount] = useState<string>('');
   const [step, setStep] = useState<TradeStep>('input');
+  
+  // React 19 Optimistic UI
+  const [optimisticBalance, addOptimisticBalance] = useOptimistic(
+    userBalance,
+    (state, tradeAmount: number) => state - tradeAmount
+  );
+
   const [estimate, setEstimate] = useState<{
     estimatedShares: number;
     pricePerShare: number;
@@ -104,22 +111,28 @@ export const TradeModal: FC<TradeModalProps> = ({
   };
 
   const handleConfirm = async () => {
+    const numAmount = parseFloat(amount);
     setStep('processing');
     
-    try {
-      const result = await api.executeTrade({
-        marketId: market.id,
-        outcome,
-        amount: parseFloat(amount),
-      });
+    // React 19 startTransition to wrap optimistic updates
+    startTransition(async () => {
+      addOptimisticBalance(numAmount);
+      
+      try {
+        const result = await api.executeTrade({
+          marketId: market.id,
+          outcome,
+          amount: numAmount,
+        });
 
-      setTransactionId(result.transactionId);
-      setBalance(result.newBalance);
-      setStep('success');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Trade failed');
-      setStep('error');
-    }
+        setTransactionId(result.transactionId);
+        setBalance(result.newBalance);
+        setStep('success');
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Trade failed');
+        setStep('error');
+      }
+    });
   };
 
   const handleSuccessClose = () => {
@@ -213,7 +226,7 @@ export const TradeModal: FC<TradeModalProps> = ({
                 <span className="text-lg font-bold text-slate-400">TON</span>
               </div>
               <div className="text-xs text-slate-500 mt-1">
-                Balance: {userBalance.toFixed(2)} TON
+                Balance: {optimisticBalance.toFixed(2)} TON
               </div>
             </div>
 
@@ -304,7 +317,7 @@ export const TradeModal: FC<TradeModalProps> = ({
               <div className="flex justify-between items-center">
                 <span className="text-sm text-slate-400">New balance</span>
                 <span className="font-bold text-white">
-                  {(userBalance - parseFloat(amount)).toFixed(2)} TON
+                  {(optimisticBalance - parseFloat(amount)).toFixed(2)} TON
                 </span>
               </div>
             </div>
