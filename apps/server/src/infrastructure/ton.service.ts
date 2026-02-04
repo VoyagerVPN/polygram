@@ -1,24 +1,27 @@
 import axios from 'axios';
+import pkg from './prisma/index.js';
+const { PrismaClient, TransactionType } = pkg;
+import type { PrismaClient as IPrismaClient } from './prisma/index.js';
 import { UserService } from '../modules/user/user.service.js';
-import { PrismaClient, TransactionType } from '@prisma/client';
 import { TON_CONFIG } from '../core/constants.js';
+import { ITonService } from './interfaces/ton-service.interface.js';
 
-export class TonService {
+export class TonService implements ITonService {
   private readonly apiKey: string;
   private readonly appWallet: string;
   private readonly baseUrl = 'https://tonapi.io/v2';
-  private readonly prisma: PrismaClient;
+  private readonly prisma: IPrismaClient;
+  private intervalId?: NodeJS.Timeout;
 
   constructor(
     apiKey: string, 
     appWallet: string, 
     private userService: UserService,
-    prisma?: PrismaClient
+    prisma: IPrismaClient
   ) {
     this.apiKey = apiKey;
     this.appWallet = appWallet;
-    // Use provided prisma or extract from userService (fallback for backwards compat)
-    this.prisma = prisma || (userService as any).prisma;
+    this.prisma = prisma;
   }
 
   /**
@@ -118,8 +121,19 @@ export class TonService {
   startMonitoring() {
     console.log('[TonService] Starting transaction monitoring for', this.appWallet);
     // Poll every 30 seconds for MVP
-    setInterval(() => this.processNewTransactions(), TON_CONFIG.POLLING_INTERVAL_MS);
+    this.intervalId = setInterval(() => this.processNewTransactions(), TON_CONFIG.POLLING_INTERVAL_MS);
     // Initial check
     this.processNewTransactions();
+  }
+
+  /**
+   * Stop monitoring and cleanup resources
+   */
+  stop() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = undefined;
+    }
+    console.log('[TonService] Monitoring stopped');
   }
 }

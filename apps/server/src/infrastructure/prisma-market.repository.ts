@@ -1,4 +1,6 @@
-import { PrismaClient, MarketStatus, Market } from '@prisma/client';
+import pkg from './prisma/index.js';
+const { PrismaClient, MarketStatus } = pkg;
+import type { Market, PrismaClient as IPrismaClient, MarketStatus as IMarketStatus } from './prisma/index.js';
 import { PRICE_HISTORY_CONFIG } from '../core/constants.js';
 import { MarketState } from '@polygram/shared';
 import { IMarketRepository, MarketData } from '../modules/market/market.service.js';
@@ -6,7 +8,7 @@ import { MarketProposal } from '../infrastructure/ai.service.js';
 import { WsService } from './ws.service.js';
 
 export class PrismaMarketRepository implements IMarketRepository {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: IPrismaClient) {}
 
   async findById(id: string): Promise<MarketState | null> {
     const market = await this.prisma.market.findUnique({
@@ -81,7 +83,7 @@ export class PrismaMarketRepository implements IMarketRepository {
   async setStatus(id: string, status: 'OPEN' | 'PENDING' | 'CLOSED'): Promise<void> {
     await this.prisma.market.update({
       where: { id },
-      data: { status: status as MarketStatus }
+      data: { status: status as IMarketStatus }
     });
   }
 }

@@ -1,0 +1,51 @@
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: polygram_user
+      POSTGRES_PASSWORD: polygram_password
+      POSTGRES_DB: polygram
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379"
+
+  server:
+    build:
+      context: .
+      dockerfile: apps/server/Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://polygram_user:polygram_password@db:5432/polygram?schema=public
+      - REDIS_URL=redis://redis:6379
+      - PORT=3000
+      - BOT_TOKEN=${BOT_TOKEN}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - CRYPTOPANIC_API_KEY=${CRYPTOPANIC_API_KEY}
+      - ADMIN_CHAT_ID=${ADMIN_CHAT_ID}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - db
+      - redis
+
+  client:
+    build:
+      context: .
+      dockerfile: apps/client/Dockerfile
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+
+volumes:
+  db-data:

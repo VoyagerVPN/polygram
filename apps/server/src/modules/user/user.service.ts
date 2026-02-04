@@ -1,7 +1,9 @@
-import { PrismaClient, User } from '@prisma/client';
+import pkg from '../../infrastructure/prisma/index.js';
+const { PrismaClient } = pkg;
+import type { User, Position, PrismaClient as IPrismaClient, Prisma } from '../../infrastructure/prisma/index.js';
 
 export class UserService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: IPrismaClient) {}
 
   async findByTelegramId(telegramId: bigint): Promise<User | null> {
     return this.prisma.user.findUnique({
@@ -50,7 +52,7 @@ export class UserService {
     if (!user) return null;
 
     // Calculate dynamic stats
-    const totalInvested = user.positions.reduce((acc, p) => acc + p.invested, 0);
+    const totalInvested = user.positions.reduce((acc: number, p: Position) => acc + p.invested, 0);
     
     return {
       ...user,
@@ -62,7 +64,9 @@ export class UserService {
     };
   }
 
-  async getLeaderboard(period: string, limit: number = 20) {
+  async getLeaderboard(period: string, limit: number = 20): Promise<Prisma.UserGetPayload<{
+    include: { transactions: { select: { id: true } } }
+  }>[]> {
     // For MVP: Simple ranking by balance
     // In production: Calculate based on realized PnL for the period
     

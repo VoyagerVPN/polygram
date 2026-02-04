@@ -52,6 +52,11 @@ export const CACHE_CONFIG = {
   NEWS_CACHE_TTL_MS: 24 * 60 * 60 * 1000, // 24 hours
 } as const;
 
+// News Service Configuration
+export const NEWS_CONFIG = {
+  FETCH_TIMEOUT_MS: 10000, // 10 seconds timeout for API calls
+} as const;
+
 // WebSocket Configuration
 export const WS_CONFIG = {
   RECONNECT_DELAY_MS: 5000,

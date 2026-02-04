@@ -1,7 +1,7 @@
 import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
-import { CACHE_CONFIG } from '../core/constants.js';
+import { CACHE_CONFIG, NEWS_CONFIG } from '../core/constants.js';
 
 export interface NewsEntry {
   title: string;
@@ -25,11 +25,20 @@ export class NewsService {
     }
 
     console.log(`[NewsService] Fetching from CryptoPanic API...`);
+    
+    // Setup timeout with AbortController
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      console.warn('[NewsService] Fetch timeout - aborting');
+      controller.abort();
+    }, NEWS_CONFIG.FETCH_TIMEOUT_MS);
+    
     try {
       // Corrected endpoint from provided API Reference: /api/developer/v2/posts/
       const url = `https://cryptopanic.com/api/developer/v2/posts/?auth_token=${this.apiKey}&public=true&filter=hot`;
       
       const response = await fetch(url, {
+        signal: controller.signal,
         headers: {
           'Accept': 'application/json',
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
@@ -55,7 +64,14 @@ export class NewsService {
       await this.saveCache(entries);
       return entries;
     } catch (err) {
-      console.error('[NewsService] Failed to fetch live news:', err instanceof Error ? err.message : err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      
+      // Log specific error type
+      if (err instanceof Error && err.name === 'AbortError') {
+        console.error('[NewsService] Fetch aborted due to timeout');
+      } else {
+        console.error('[NewsService] Failed to fetch live news:', errorMessage);
+      }
       
       const cached = await this.readCache();
       if (cached) {
@@ -65,6 +81,7 @@ export class NewsService {
 
       console.log('[NewsService] Using MOCK news as ultimate fallback');
       return [
+        // Fallback mock data
         {
           title: "Solana TVL hits $10 billion as ecosystem explodes",
           description: "New projects and high throughput attract developers and investors.",
@@ -78,6 +95,8 @@ export class NewsService {
           published_at: new Date().toISOString()
         }
       ];
+    } finally {
+      clearTimeout(timeoutId);
     }
   }
 

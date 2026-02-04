@@ -3,14 +3,16 @@
  * Following SOLID: Concrete implementation of ITradeRepository
  */
 
-import { PrismaClient, Prisma, TransactionType } from '@prisma/client';
+import pkg from '../../infrastructure/prisma/index.js';
+const { PrismaClient, TransactionType } = pkg;
+import type { Prisma, PrismaClient as IPrismaClient } from '../../infrastructure/prisma/index.js';
 import { MarketState } from '@polygram/shared';
 import { TradeExecution, TradeResult } from './trade.dto.js';
 import { ITradeRepository } from './trade.repository.interface.js';
 import { WsService } from '../../infrastructure/ws.service.js';
 
 export class PrismaTradeRepository implements ITradeRepository {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: IPrismaClient) {}
 
   async getUserBalance(userId: string): Promise<number> {
     const user = await this.prisma.user.findUnique({

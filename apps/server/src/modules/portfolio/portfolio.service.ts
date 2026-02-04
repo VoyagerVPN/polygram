@@ -3,7 +3,9 @@
  * Following SOLID: Single Responsibility - handles portfolio calculations
  */
 
-import { PrismaClient, Prisma } from '@prisma/client';
+import pkg from '../../infrastructure/prisma/index.js';
+const { PrismaClient } = pkg;
+import type { Prisma, PrismaClient as IPrismaClient } from '../../infrastructure/prisma/index.js';
 import { LMSRCalculator, MarketState } from '@polygram/shared';
 
 export interface PortfolioData {
@@ -49,7 +51,7 @@ export interface IPortfolioService {
 }
 
 export class PortfolioService implements IPortfolioService {
-  constructor(private prisma: PrismaClient) {}
+  constructor(private prisma: IPrismaClient) {}
 
   async getPortfolioData(userId: string): Promise<PortfolioData> {
     const user = await this.prisma.user.findUnique({
@@ -146,7 +148,11 @@ export class PortfolioService implements IPortfolioService {
       take: 50,
     });
 
-    return transactions.map((tx) => ({
+    type TransactionWithMarket = Prisma.TransactionGetPayload<{
+      include: { market: { select: { question: true } } }
+    }>;
+
+    return (transactions as TransactionWithMarket[]).map((tx) => ({
       id: tx.id,
       type: tx.type,
       amount: tx.amount,

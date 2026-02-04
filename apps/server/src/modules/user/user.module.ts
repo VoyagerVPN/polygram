@@ -1,3 +1,6 @@
+import pkg from '../../infrastructure/prisma/index.js';
+const { PrismaClient } = pkg;
+import type { User } from '../../infrastructure/prisma/index.js';
 import { FastifyInstance } from 'fastify';
 import { UserService } from './user.service.js';
 import { AuthService } from './auth.service.js';
@@ -79,7 +82,7 @@ export async function UserModule(fastify: FastifyInstance, options: { service: U
       
       return {
         period,
-        users: topUsers.map((user, index) => ({
+        users: topUsers.map((user, index: number) => ({
           rank: index + 1,
           id: user.id,
           username: user.username,

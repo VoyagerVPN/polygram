@@ -1,0 +1,14 @@
+node_modules
+**/node_modules
+apps/*/dist
+packages/*/dist
+.git
+.gitignore
+.dockerignore
+.vscode
+.env
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*

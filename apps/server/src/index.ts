@@ -9,7 +9,8 @@ import { MarketModule } from './modules/market/market.module.js';
 import { BotService } from './infrastructure/bot.service.js';
 import { MarketService } from './modules/market/market.service.js';
 import { PrismaMarketRepository } from './infrastructure/prisma-market.repository.js';
-import { PrismaClient } from '@prisma/client';
+import pkg from './infrastructure/prisma/index.js';
+const { PrismaClient } = pkg;
 import { NewsService } from './infrastructure/news.service.js';
 import { AiService } from './infrastructure/ai.service.js';
 import { AutomationService } from './infrastructure/automation.service.js';
@@ -19,15 +20,19 @@ import { AuthService } from './modules/user/auth.service.js';
 import { UserService as UserServiceImpl } from './modules/user/user.service.js';
 import { ResolutionService } from './infrastructure/resolution.service.js';
 import { TonService } from './infrastructure/ton.service.js';
+import { MockTonService } from './infrastructure/mock-ton.service.js';
+import { ITonService, IMockTonService } from './infrastructure/interfaces/ton-service.interface.js';
 import TradeModule from './modules/trading/trade.module.js';
 import PortfolioModule from './modules/portfolio/portfolio.module.js';
 import { authMiddleware } from './modules/user/auth.middleware.js';
 
+// Environment check
 console.log('[DEBUG] Environment check:');
 console.log('- DATABASE_URL:', !!process.env.DATABASE_URL);
 console.log('- BOT_TOKEN:', !!process.env.BOT_TOKEN);
 console.log('- OPENROUTER_API_KEY:', !!process.env.OPENROUTER_API_KEY);
 console.log('- CRYPTOPANIC_API_KEY:', !!process.env.CRYPTOPANIC_API_KEY);
+console.log('- USE_MOCK_TON:', process.env.USE_MOCK_TON === 'true' ? '✅ ENABLED' : '❌ disabled');
 
 const fastify = Fastify({
   logger: true,
@@ -36,8 +41,27 @@ const fastify = Fastify({
   }
 });
 
+// Health check endpoint
+fastify.get('/health', async () => {
+  return {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    services: {
+      database: 'connected',
+      bot: 'initialized'
+    }
+  };
+});
+
+// Root endpoint
 fastify.get('/', async () => {
-  return { status: 'ok', service: 'polygram-server' };
+  return { 
+    status: 'ok', 
+    service: 'polygram-server',
+    version: '1.0.0',
+    healthCheck: '/health'
+  };
 });
 
 // Setup DI Layer
@@ -75,12 +99,25 @@ const resolutionService = new ResolutionService(
   bot
 );
 
-const tonService = new TonService(
-  process.env.TONAPI_KEY || '',
-  process.env.APP_WALLET || '',
-  userService,
-  prisma
-);
+// Choose between real and mock TON service
+const useMockTon = process.env.USE_MOCK_TON === 'true';
+let tonService: ITonService;
+let mockTonService: IMockTonService | undefined;
+
+if (useMockTon) {
+  console.log('[Server] Using MOCK TON Service');
+  mockTonService = new MockTonService(userService, prisma);
+  tonService = mockTonService;
+  bot.setMockTonService(mockTonService);
+} else {
+  console.log('[Server] Using REAL TON Service');
+  tonService = new TonService(
+    process.env.TONAPI_KEY || '',
+    process.env.APP_WALLET || '',
+    userService,
+    prisma
+  );
+}
 
 // Register Plugins
 await fastify.register(cors, { 
@@ -147,9 +184,56 @@ await fastify.register(async (instance, opts) => {
   });
 }, { prefix: '/api' });
 
+/**
+ * Graceful shutdown handler
+ * Ensures all resources are properly closed before exit
+ */
+const shutdown = async (signal: string) => {
+  console.log(`\n[Server] ${signal} received, starting graceful shutdown...`);
+  
+  try {
+    // Stop all interval-based services
+    console.log('[Server] Stopping ResolutionService...');
+    resolutionService.stop();
+    
+    console.log('[Server] Stopping TonService...');
+    tonService.stop();
+    
+    console.log('[Server] Stopping Bot...');
+    await bot.stop();
+    
+    console.log('[Server] Closing Fastify...');
+    await fastify.close();
+    
+    console.log('[Server] Disconnecting Prisma...');
+    await prisma.$disconnect();
+    
+    console.log('[Server] Graceful shutdown completed');
+    process.exit(0);
+  } catch (err) {
+    console.error('[Server] Error during shutdown:', err);
+    process.exit(1);
+  }
+};
+
+// Register shutdown handlers
+process.once('SIGINT', () => shutdown('SIGINT'));
+process.once('SIGTERM', () => shutdown('SIGTERM'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('[Server] Uncaught Exception:', err);
+  shutdown('UNCAUGHT_EXCEPTION');
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[Server] Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 const start = async () => {
   try {
-    const address = await fastify.listen({ port: 3001, host: '0.0.0.0' });
+    const port = Number(process.env.PORT) || 3001;
+    const address = await fastify.listen({ port, host: '0.0.0.0' });
     console.log(`SERVER IS LIVE: ${address}`);
 
     // Launch Telegram Bot (manual commands only)

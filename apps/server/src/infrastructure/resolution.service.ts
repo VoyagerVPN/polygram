@@ -1,4 +1,6 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import pkg from './prisma/index.js';
+const { PrismaClient } = pkg;
+import type { Prisma, PrismaClient as IPrismaClient } from './prisma/index.js';
 import { RESOLUTION_CONFIG } from '../core/constants.js';
 
 type Outcome = 'YES' | 'NO';
@@ -8,8 +10,10 @@ import { NewsService, NewsEntry } from './news.service.js';
 import { BotService } from './bot.service.js';
 
 export class ResolutionService {
+  private intervalId?: NodeJS.Timeout;
+
   constructor(
-    private prisma: PrismaClient,
+    private prisma: IPrismaClient,
     private marketService: MarketService,
     private aiService: AiService,
     private newsService: NewsService,
@@ -111,6 +115,14 @@ export class ResolutionService {
 
   start() {
     console.log('[Resolution] Scheduler started.');
-    setInterval(() => this.checkAndResolveMarkets(), RESOLUTION_CONFIG.CHECK_INTERVAL_MS);
+    this.intervalId = setInterval(() => this.checkAndResolveMarkets(), RESOLUTION_CONFIG.CHECK_INTERVAL_MS);
+  }
+
+  stop() {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+      this.intervalId = undefined;
+    }
+    console.log('[Resolution] Scheduler stopped');
   }
 }
