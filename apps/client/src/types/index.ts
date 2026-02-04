@@ -64,8 +64,8 @@ export interface MarketHistoryResponse {
 }
 
 export interface PriceHistoryPoint {
-  time: string;
-  value: number;
+  timestamp: string;
+  price: number;
 }
 
 // WebSocket Types
@@ -173,6 +173,3 @@ export interface Transaction {
   createdAt: string;
 }
 
-// Utility Types
-export type Nullable<T> = T | null;
-export type Optional<T> = T | undefined;

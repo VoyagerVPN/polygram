@@ -12,11 +12,7 @@ export default defineConfig({
     setupFiles: ['./src/test/setup.ts'],
     // Ensure jsdom is used for DOM APIs
     pool: 'threads',
-    poolOptions: {
-      threads: {
-        execArgv: ['--experimental-vm-modules'],
-      },
-    },
+    execArgv: ['--experimental-vm-modules'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

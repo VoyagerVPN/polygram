@@ -57,6 +57,9 @@ model Market {
   
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+
+  @@index([status, expiresAt])
+  @@index([createdAt])
 }
 
 model Position {

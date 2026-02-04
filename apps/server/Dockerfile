@@ -4,7 +4,7 @@ FROM node:22-alpine AS builder
 # Install pnpm
 RUN npm install -g pnpm@10
 ENV CI=true
-# ENV PRISMA_CLIENT_ENGINE_TYPE=library
+# Prisma 7 uses WASM by default, no native engines needed
 
 WORKDIR /app
 
@@ -27,8 +27,7 @@ RUN pnpm --filter @polygram/server deploy --legacy --prod /isolated
 
 # Production stage
 FROM node:22-alpine AS production
-RUN apk add --no-cache openssl
-# ENV PRISMA_CLIENT_ENGINE_TYPE=library
+# openssl is no longer needed for Prisma 7 Rust-free (WASM) client
 WORKDIR /app
 
 # Copy the isolated package package.json and node_modules
@@ -38,6 +37,9 @@ COPY --from=builder /isolated .
 COPY --from=builder /app/apps/server/dist ./dist
 # Shared package dist
 COPY --from=builder /app/packages/shared/dist ./node_modules/@polygram/shared/dist
+
+# Prisma schema for migrations
+COPY --from=builder /app/apps/server/prisma ./prisma
 
 # Expose port
 EXPOSE 3000

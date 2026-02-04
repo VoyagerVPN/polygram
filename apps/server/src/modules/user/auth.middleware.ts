@@ -3,15 +3,13 @@
  * Validates Telegram WebApp initData
  */
 
-import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify';
+import { FastifyRequest, FastifyReply } from 'fastify';
 import crypto from 'crypto';
-import pkg from '../../infrastructure/prisma/index.js';
-const { PrismaClient } = pkg;
 
 // Module augmentation for Fastify decoration
 declare module 'fastify' {
   interface FastifyInstance {
-    prisma: InstanceType<typeof PrismaClient>;
+    prisma: import('../../infrastructure/prisma/index.js').PrismaClient;
   }
   interface FastifyRequest {
     user: {

@@ -21,8 +21,8 @@ FROM nginx:alpine AS production
 # Copy the built assets to the Nginx html folder
 COPY --from=builder /app/apps/client/dist /usr/share/nginx/html
 
-# Optional: Add a custom nginx config if needed for SPA routing
-# COPY apps/client/nginx.conf /etc/nginx/conf.d/default.conf
+# Add a custom nginx config for SPA routing
+COPY apps/client/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 

@@ -1,5 +1,3 @@
-import pkg from '../../infrastructure/prisma/index.js';
-const { PrismaClient } = pkg;
 import type { User, Position, PrismaClient as IPrismaClient, Prisma } from '../../infrastructure/prisma/index.js';
 
 export class UserService {

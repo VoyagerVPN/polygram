@@ -1,12 +1,10 @@
-import pkg from './prisma/index.js';
-const { PrismaClient } = pkg;
 import type { Prisma, PrismaClient as IPrismaClient } from './prisma/index.js';
 import { RESOLUTION_CONFIG } from '../core/constants.js';
 
 type Outcome = 'YES' | 'NO';
 import { MarketService } from '../modules/market/market.service.js';
 import { AiService } from './ai.service.js';
-import { NewsService, NewsEntry } from './news.service.js';
+import { NewsService } from './news.service.js';
 import { BotService } from './bot.service.js';
 
 export class ResolutionService {

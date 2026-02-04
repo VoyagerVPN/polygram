@@ -82,8 +82,8 @@ export const PriceChart: FC<PriceChartProps> = ({ data }) => {
 
     // Format data for lightweight-charts
     const formattedData: AreaData<Time>[] = data.map(point => ({
-      time: point.time as Time,
-      value: point.value,
+      time: point.timestamp as Time,
+      value: point.price,
     }));
 
     seriesRef.current.setData(formattedData);

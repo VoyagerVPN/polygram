@@ -1,6 +1,27 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-tg-blue: #0A84FF;
+  --color-tg-green: #34C759;
+  --color-tg-red: #FF3B30;
+  --color-tg-bg: var(--tg-theme-bg-color);
+
+  --blur-xs: 2px;
+  
+  /* App-specific colors - Design System */
+  --color-app-primary: #3289ec;
+  --color-app-success: #0bda5e;
+  --color-app-success-bg: rgba(11, 218, 94, 0.1);
+  --color-app-danger: #ff4b4b;
+  --color-app-danger-bg: rgba(255, 75, 75, 0.1);
+  --color-app-card-bg: #1c2631;
+  --color-app-surface-bg: #161C26;
+  --color-app-border: rgba(255, 255, 255, 0.05);
+  
+  --color-app-gold: #FACC15;
+  --color-app-silver: #94A3B8;
+  --color-app-bronze: #A8A29E;
+}
 
 /* Telegram Theme Variables */
 :root {
@@ -18,20 +39,6 @@
   --tg-theme-section-header-text-color: #64748b;
   --tg-theme-subtitle-text-color: #64748b;
   --tg-theme-destructive-text-color: #ff4b4b;
-  
-  /* App-specific colors - Design System */
-  --app-primary: #3289ec;
-  --app-success: #0bda5e;
-  --app-success-bg: rgba(11, 218, 94, 0.1);
-  --app-danger: #ff4b4b;
-  --app-danger-bg: rgba(255, 75, 75, 0.1);
-  --app-card-bg: #1c2631;
-  --app-surface-bg: #161C26;
-  --app-border: rgba(255, 255, 255, 0.05);
-  
-  --app-gold: #FACC15;
-  --app-silver: #94A3B8;
-  --app-bronze: #A8A29E;
 }
 
 * {

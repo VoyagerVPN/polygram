@@ -21,7 +21,7 @@ import { PriceChart } from '@/components/PriceChart';
 import { TradeModal } from '@/components/TradeModal';
 import { usePolygramStore } from '@/store/usePolygramStore';
 import { api } from '@/api/client';
-import type { MarketData } from '@/types';
+import type { MarketData, PriceHistoryPoint } from '@/types';
 import { formatNumber, formatTimeLeft } from '@/helpers/format';
 
 export const MarketDetailPage: FC = () => {
@@ -34,7 +34,7 @@ export const MarketDetailPage: FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isTradeModalOpen, setIsTradeModalOpen] = useState(false);
   const [tradeOutcome, setTradeOutcome] = useState<'YES' | 'NO'>('YES');
-  const [priceHistory, setPriceHistory] = useState<{ timestamp: string; price: number }[]>([]);
+  const [priceHistory, setPriceHistory] = useState<PriceHistoryPoint[]>([]);
 
   useEffect(() => {
     if (marketId) {
@@ -178,7 +178,7 @@ export const MarketDetailPage: FC = () => {
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
             Price History
           </h3>
-          <PriceChart data={priceHistory.map(p => ({ time: p.timestamp, value: p.price }))} />
+          <PriceChart data={priceHistory} />
         </motion.section>
 
         {/* Market Info */}

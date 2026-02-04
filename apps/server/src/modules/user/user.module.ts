@@ -1,6 +1,3 @@
-import pkg from '../../infrastructure/prisma/index.js';
-const { PrismaClient } = pkg;
-import type { User } from '../../infrastructure/prisma/index.js';
 import { FastifyInstance } from 'fastify';
 import { UserService } from './user.service.js';
 import { AuthService } from './auth.service.js';

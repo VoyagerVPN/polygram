@@ -14,6 +14,8 @@ import type {
   PortfolioData,
   PortfolioPosition,
   Transaction,
+  PriceHistoryPoint,
+  MarketHistoryResponse,
 } from '@/types';
 
 class APIError extends Error {
@@ -73,8 +75,9 @@ export const api = {
   /**
    * Get market price history
    */
-  async getMarketHistory(id: string): Promise<{ timestamp: string; price: number }[]> {
-    return fetchJSON<{ timestamp: string; price: number }[]>(`${API_BASE_URL}/markets/${id}/history`);
+  async getMarketHistory(id: string): Promise<PriceHistoryPoint[]> {
+    const data = await fetchJSON<MarketHistoryResponse>(`${API_BASE_URL}/markets/${id}/history`);
+    return data.history || [];
   },
 
   /**

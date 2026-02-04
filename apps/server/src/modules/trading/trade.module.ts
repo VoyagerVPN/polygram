@@ -4,8 +4,6 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import pkg from '../../infrastructure/prisma/index.js';
-const { PrismaClient } = pkg;
 import type { PrismaClient as IPrismaClient } from '../../infrastructure/prisma/index.js';
 import { TradeController } from './trade.controller.js';
 import { TradeService } from './trade.service.js';

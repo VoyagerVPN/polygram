@@ -46,6 +46,8 @@ jobs:
 
       - name: Lint all packages
         run: pnpm lint
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/unused"
 
   # ==========================================
   # Job 2: Type Check
@@ -79,6 +81,8 @@ jobs:
 
       - name: Type check server
         run: pnpm -F @polygram/server build
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/unused"
 
   # ==========================================
   # Job 3: Tests (robust, с сервисами)

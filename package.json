@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "knip": "^5.0.0",
-    "vitest": "^3.0.5",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "4.0.18"
   }
 }

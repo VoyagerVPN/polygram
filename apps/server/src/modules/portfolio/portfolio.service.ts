@@ -3,8 +3,6 @@
  * Following SOLID: Single Responsibility - handles portfolio calculations
  */
 
-import pkg from '../../infrastructure/prisma/index.js';
-const { PrismaClient } = pkg;
 import type { Prisma, PrismaClient as IPrismaClient } from '../../infrastructure/prisma/index.js';
 import { LMSRCalculator, MarketState } from '@polygram/shared';
 
