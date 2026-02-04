@@ -43,6 +43,8 @@ jobs:
 
       - name: Generate Prisma Client
         run: pnpm -F @polygram/server db:generate
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/unused"
 
       - name: Lint all packages
         run: pnpm lint
@@ -75,6 +77,8 @@ jobs:
 
       - name: Generate Prisma Client
         run: pnpm -F @polygram/server db:generate
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/unused"
 
       - name: Type check client
         run: pnpm -F @polygram/client build --mode development
@@ -215,6 +219,8 @@ jobs:
       - name: Generate Prisma Client
         if: matrix.app == 'server'
         run: pnpm -F @polygram/server db:generate
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/unused"
 
       - name: Build @polygram/shared
         run: pnpm -F @polygram/shared build
