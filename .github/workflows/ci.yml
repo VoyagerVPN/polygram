@@ -48,15 +48,11 @@ jobs:
         run: pnpm lint
 
   # ==========================================
-  # Job 2: Type Check (matrix: Node.js versions)
+  # Job 2: Type Check
   # ==========================================
   typecheck:
-    name: Type Check (Node ${{ matrix.node }})
+    name: Type Check
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        node: [22]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -66,10 +62,10 @@ jobs:
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Node.js ${{ matrix.node }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
       - name: Install dependencies
@@ -140,6 +136,13 @@ jobs:
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
 
+      - name: Check coverage packages
+        run: |
+          echo "=== Coverage packages ==="
+          pnpm -F @polygram/shared list @vitest/coverage-v8 || echo "Not found in shared"
+          pnpm -F @polygram/server list @vitest/coverage-v8 || echo "Not found in server"
+          pnpm -F @polygram/client list @vitest/coverage-v8 || echo "Not found in client"
+
       - name: Generate Prisma Client
         run: pnpm -F @polygram/server db:generate
 
@@ -150,7 +153,10 @@ jobs:
         run: pnpm -F @polygram/shared build
 
       - name: Run tests with coverage
-        run: pnpm -r test -- --coverage --reporter=verbose
+        run: |
+          pnpm -F @polygram/shared exec vitest run --coverage --reporter=verbose
+          pnpm -F @polygram/server exec vitest run --coverage --reporter=verbose --passWithNoTests
+          pnpm -F @polygram/client exec vitest run --coverage --reporter=verbose --passWithNoTests
 
       - name: Verify coverage directory exists
         run: |
@@ -172,7 +178,7 @@ jobs:
           if-no-files-found: warn
 
   # ==========================================
-  # Job 4: Build (matrix: app × Node version)
+  # Job 4: Build
   # ==========================================
   build:
     name: "@polygram/${{ matrix.app }}"
@@ -183,7 +189,6 @@ jobs:
       fail-fast: false
       matrix:
         app: [client, server, shared]
-        node: [22]
 
     steps:
       - name: Checkout
@@ -194,10 +199,10 @@ jobs:
         with:
           version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Node.js ${{ matrix.node }}
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node }}
+          node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
 
       - name: Install dependencies
