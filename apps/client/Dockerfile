@@ -6,29 +6,24 @@ RUN npm install -g pnpm@10
 
 WORKDIR /app
 
-# Copy workspace files
-COPY pnpm-workspace.yaml package.json ./
-COPY pnpm-lock.yaml ./
-COPY packages/shared/package.json packages/shared/
-COPY apps/client/package.json apps/client/
+# Copy all source files
+COPY . .
 
-# Install dependencies
+# Install dependencies for all packages
 RUN pnpm install --frozen-lockfile
 
-# Copy source code
-COPY packages/shared/ packages/shared/
-COPY apps/client/ apps/client/
+# Build the client app (using workspace context)
+RUN pnpm -F @polygram/client build
 
-# Build the client app
-RUN cd apps/client && pnpm build
-
-# Serve stage
+# Production stage - Nginx for static serving
 FROM nginx:alpine AS production
 
-# Copy build artifacts to nginx public folder
+# Copy the built assets to the Nginx html folder
 COPY --from=builder /app/apps/client/dist /usr/share/nginx/html
 
-# Expose port 80
+# Optional: Add a custom nginx config if needed for SPA routing
+# COPY apps/client/nginx.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]

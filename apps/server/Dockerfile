@@ -6,48 +6,34 @@ RUN npm install -g pnpm@10
 
 WORKDIR /app
 
-# Copy workspace files
-COPY pnpm-workspace.yaml package.json ./
-COPY pnpm-lock.yaml ./
-COPY packages/shared/package.json packages/shared/
-COPY apps/server/package.json apps/server/
+# Copy everything for building
+COPY . .
 
-# Install dependencies
+# Install all dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy source code
-COPY packages/shared/ packages/shared/
-COPY apps/server/ apps/server/
-COPY apps/server/prisma/ apps/server/prisma/
-
 # Generate Prisma Client and build
-RUN cd apps/server && pnpm db:generate && pnpm build
+RUN pnpm -F @polygram/server build
+
+# Isolate the server package into /isolated
+# This command copies the package and its production dependencies (including shared workspace)
+RUN pnpm --filter @polygram/server deploy --prod /isolated
 
 # Production stage
 FROM node:22-alpine AS production
 
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm@10
+# Copy the isolated package from builder
+COPY --from=builder /isolated .
 
-# Copy workspace files
-COPY pnpm-workspace.yaml package.json ./
-COPY pnpm-lock.yaml ./
-COPY packages/shared/package.json packages/shared/
-COPY apps/server/package.json apps/server/
-
-# Install production dependencies only
-RUN pnpm install --frozen-lockfile --prod
-
-# Copy built files and generated prisma client
-COPY --from=builder /app/packages/shared/dist/ packages/shared/dist/
-COPY --from=builder /app/apps/server/dist/ apps/server/dist/
-COPY --from=builder /app/apps/server/prisma/ apps/server/prisma/
-COPY --from=builder /app/node_modules/.prisma/ node_modules/.prisma/
+# Ensure the build artifacts are present (pnpm deploy might not include dist if ignored)
+COPY --from=builder /app/apps/server/dist ./dist
 
 # Expose port
 EXPOSE 3000
 
-# Start the server
-CMD ["node", "apps/server/dist/index.js"]
+# Start from the flat isolated structure
+# Since we deployed @polygram/server, apps/server/dist becomes ./dist
+# Based on previous build check, index.js is at dist/apps/server/src/index.js
+CMD ["node", "dist/apps/server/src/index.js"]
