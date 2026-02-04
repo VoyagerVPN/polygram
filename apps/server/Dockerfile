@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 # Install pnpm
 RUN npm install -g pnpm@10
@@ -8,6 +8,7 @@ WORKDIR /app
 
 # Copy workspace files
 COPY pnpm-workspace.yaml package.json ./
+COPY pnpm-lock.yaml ./
 COPY packages/shared/package.json packages/shared/
 COPY apps/server/package.json apps/server/
 
@@ -23,7 +24,7 @@ COPY apps/server/prisma/ apps/server/prisma/
 RUN cd apps/server && pnpm db:generate && pnpm build
 
 # Production stage
-FROM node:20-alpine AS production
+FROM node:22-alpine AS production
 
 WORKDIR /app
 
@@ -32,6 +33,7 @@ RUN npm install -g pnpm@10
 
 # Copy workspace files
 COPY pnpm-workspace.yaml package.json ./
+COPY pnpm-lock.yaml ./
 COPY packages/shared/package.json packages/shared/
 COPY apps/server/package.json apps/server/
 
