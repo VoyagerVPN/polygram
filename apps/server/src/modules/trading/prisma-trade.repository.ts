@@ -56,7 +56,7 @@ export class PrismaTradeRepository implements ITradeRepository {
     const { userId, marketId, outcome, amount } = execution;
     const isYes = outcome === 'YES';
 
-    return this.prisma.$transaction(async (tx) => {
+    return this.prisma.$transaction(async (tx: any) => {
       // 1. Update user balance
       const updatedUser = await tx.user.update({
         where: { id: userId },

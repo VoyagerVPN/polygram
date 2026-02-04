@@ -47,7 +47,7 @@ export async function MarketModule(fastify: FastifyInstance, options: MarketModu
       take: 100
     });
     return { 
-      history: history.map(h => ({
+      history: history.map((h: any) => ({
         time: h.timestamp.toISOString().split('T')[0],
         value: h.priceYes
       }))

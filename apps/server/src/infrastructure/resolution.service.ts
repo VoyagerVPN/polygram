@@ -75,7 +75,7 @@ export class ResolutionService {
 
     // Calculate payouts
     // In LMSR, usually winners get 1 unit per share
-    await this.prisma.$transaction(async (tx) => {
+    await this.prisma.$transaction(async (tx: any) => {
       for (const position of market.positions) {
         let payout = 0;
         if (outcome === 'YES') {

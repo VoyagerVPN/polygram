@@ -26,7 +26,7 @@ export class PrismaMarketRepository implements IMarketRepository {
       orderBy: { createdAt: 'desc' }
     });
 
-    return markets.map(m => ({
+    return markets.map((m: any) => ({
       id: m.id,
       question: m.question,
       status: m.status,
