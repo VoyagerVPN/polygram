@@ -13,40 +13,42 @@ describe('User API', () => {
     await cleanupApp(app);
   });
 
-  describe('GET /api/users/me', () => {
-    it('should handle me endpoint', async () => {
+  describe('GET /api/users/auth/payload', () => {
+    it('should return auth payload', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/api/users/me'
+        url: '/api/users/auth/payload'
       });
 
-      // Endpoint should exist
-      expect(response.statusCode).not.toBe(404);
+      // Should return 200 with payload
+      expect(response.statusCode).toBe(200);
+      const body = JSON.parse(response.body);
+      expect(body).toHaveProperty('payload');
+      expect(body).toHaveProperty('tempId');
     });
   });
 
-  describe('POST /api/users/auth/telegram', () => {
-    it('should handle telegram auth', async () => {
+  describe('POST /api/users/auth/verify', () => {
+    it('should handle verification without payload', async () => {
       const response = await app.inject({
         method: 'POST',
-        url: '/api/users/auth/telegram',
+        url: '/api/users/auth/verify',
         payload: {}
       });
 
-      // Should handle request (validation error or success)
-      expect(response.statusCode).not.toBe(404);
+      // Should return error (400) since no valid payload provided
+      expect(response.statusCode).toBe(400);
     });
   });
 
-  describe('GET /api/users/portfolio', () => {
-    it('should handle portfolio endpoint', async () => {
+  describe('GET /api/users/profile/:id', () => {
+    it('should return 404 for non-existent user', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/api/users/portfolio'
+        url: '/api/users/profile/non-existent-id'
       });
 
-      // Endpoint should exist
-      expect(response.statusCode).not.toBe(404);
+      expect(response.statusCode).toBe(404);
     });
   });
 });

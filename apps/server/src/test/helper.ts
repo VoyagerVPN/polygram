@@ -4,9 +4,6 @@ import { vi } from 'vitest';
 import { MarketModule } from '../modules/market/market.module.js';
 import TradeModule from '../modules/trading/trade.module.js';
 import { UserModule } from '../modules/user/user.module.js';
-import { TradeService } from '../modules/trading/trade.service.js';
-import { UserService } from '../modules/user/user.service.js';
-import { AuthService } from '../modules/user/auth.service.js';
 
 // Create mock Prisma client
 function createMockPrisma() {
@@ -23,7 +20,7 @@ function createMockPrisma() {
       create: vi.fn(),
     },
     user: {
-      findUnique: vi.fn(),
+      findUnique: vi.fn().mockResolvedValue(null),
       findMany: vi.fn(),
       create: vi.fn(),
     },
@@ -35,6 +32,26 @@ function createMockPrisma() {
       upsert: vi.fn(),
     },
     $transaction: vi.fn((callback: any) => callback({})),
+  } as any;
+}
+
+// Create mock UserService
+function createMockUserService() {
+  return {
+    syncUser: vi.fn().mockResolvedValue({
+      id: 'test-user-id',
+      balance: 1000,
+      tonAddress: 'test-address'
+    }),
+    getProfile: vi.fn().mockResolvedValue(null),
+  } as any;
+}
+
+// Create mock AuthService
+function createMockAuthService() {
+  return {
+    generatePayload: vi.fn().mockResolvedValue('test-payload'),
+    verifyProof: vi.fn().mockResolvedValue(true),
   } as any;
 }
 
@@ -66,8 +83,8 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   await app.register(UserModule, { 
     prefix: '/api/users',
-    service: { findById: vi.fn() } as any,
-    auth: { verifyToken: vi.fn() } as any,
+    service: createMockUserService(),
+    auth: createMockAuthService(),
   });
 
   return app;
