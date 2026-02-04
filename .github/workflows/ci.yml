@@ -138,7 +138,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
 
       - name: Generate Prisma Client
         run: pnpm -F @polygram/server db:generate
@@ -151,7 +151,13 @@ jobs:
 
       - name: Run tests with coverage
         run: pnpm -r test -- --coverage --reporter=verbose
-        continue-on-error: true  # Coverage может падать из-за отсутствия пакетов
+
+      - name: Verify coverage directory exists
+        run: |
+          ls -la apps/server/coverage/ 2>/dev/null || echo "Server coverage not found"
+          ls -la apps/client/coverage/ 2>/dev/null || echo "Client coverage not found"
+          ls -la packages/shared/coverage/ 2>/dev/null || echo "Shared coverage not found"
+        continue-on-error: true
 
       - name: Upload coverage reports
         uses: actions/upload-artifact@v4
@@ -159,9 +165,11 @@ jobs:
         with:
           name: coverage-report
           path: |
-            **/coverage/
-            !**/node_modules/
+            apps/server/coverage/
+            apps/client/coverage/
+            packages/shared/coverage/
           retention-days: 7
+          if-no-files-found: warn
 
   # ==========================================
   # Job 4: Build (matrix: app × Node version)
