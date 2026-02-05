@@ -3,7 +3,7 @@
  * Following SOLID: Single Responsibility - handles portfolio calculations
  */
 
-import type { Prisma, PrismaClient as IPrismaClient } from '../../infrastructure/prisma/index.js';
+import type { Prisma, PrismaClient as IPrismaClient } from '@prisma/client';
 import { LMSRCalculator, MarketState } from '@polygram/shared';
 
 export interface PortfolioData {

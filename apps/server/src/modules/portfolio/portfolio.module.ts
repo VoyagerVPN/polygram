@@ -4,7 +4,7 @@
  */
 
 import { FastifyInstance } from 'fastify';
-import type { PrismaClient as IPrismaClient } from '../../infrastructure/prisma/index.js';
+import type { PrismaClient as IPrismaClient } from '@prisma/client';
 import { PortfolioController } from './portfolio.controller.js';
 import { PortfolioService } from './portfolio.service.js';
 

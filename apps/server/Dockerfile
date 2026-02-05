@@ -20,9 +20,7 @@ RUN pnpm install --frozen-lockfile
 # The client is now generated INTO src/infrastructure/prisma
 RUN pnpm -F @polygram/server db:generate && pnpm -r build
 
-# CRITICAL: Copy the generated JS client from src to dist because tsc doesn't do it
-RUN mkdir -p apps/server/dist/apps/server/src/infrastructure/prisma && \
-    cp -r apps/server/src/infrastructure/prisma/* apps/server/dist/apps/server/src/infrastructure/prisma/
+# Prisma client is generated in node_modules (default location)
 
 # Isolate the server package into /isolated
 RUN pnpm --filter @polygram/server deploy --legacy --prod /isolated
@@ -42,6 +40,9 @@ COPY --from=builder /app/packages/shared/dist ./node_modules/@polygram/shared/di
 
 # Prisma schema for migrations
 COPY --from=builder /app/apps/server/prisma ./prisma
+
+# Generate Prisma Client in production stage (pnpm deploy doesn't copy generated .prisma/client)
+RUN npx prisma generate
 
 # Expose port
 EXPOSE 3000

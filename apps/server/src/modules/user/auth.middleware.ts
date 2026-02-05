@@ -9,7 +9,7 @@ import crypto from 'crypto';
 // Module augmentation for Fastify decoration
 declare module 'fastify' {
   interface FastifyInstance {
-    prisma: import('../../infrastructure/prisma/index.js').PrismaClient;
+    prisma: import('@prisma/client').PrismaClient;
   }
   interface FastifyRequest {
     user: {

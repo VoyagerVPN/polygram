@@ -1,4 +1,4 @@
-import type { User, Position, PrismaClient as IPrismaClient, Prisma } from '../../infrastructure/prisma/index.js';
+import type { User, Position, PrismaClient as IPrismaClient, Prisma } from '@prisma/client';
 
 export class UserService {
   constructor(private prisma: IPrismaClient) {}

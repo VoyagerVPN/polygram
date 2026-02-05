@@ -1,6 +1,6 @@
 import { IMockTonService } from './interfaces/ton-service.interface.js';
 import { TonService } from './ton.service.js';
-import type { PrismaClient } from './prisma/index.js';
+import type { PrismaClient } from '@prisma/client';
 import { UserService } from '../modules/user/user.service.js';
 
 /**

@@ -1,7 +1,7 @@
 import Fastify from 'fastify';
 import type { FastifyInstance } from 'fastify';
 import { vi } from 'vitest';
-import type { PrismaClient } from '../infrastructure/prisma/index.js';
+import type { PrismaClient } from '@prisma/client';
 import { MarketModule } from '../modules/market/market.module.js';
 import TradeModule from '../modules/trading/trade.module.js';
 import { UserModule } from '../modules/user/user.module.js';

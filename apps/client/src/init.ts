@@ -28,8 +28,8 @@ export async function init(options: {
   setDebug(options.debug);
   initSDK();
 
-  // Add Eruda if needed.
-  if (options.eruda) {
+  // Add Eruda if needed (only in development).
+  if (import.meta.env.DEV && options.eruda) {
     void import('eruda').then(({ default: eruda }) => {
       eruda.init();
       eruda.position({ x: window.innerWidth - 50, y: 0 });

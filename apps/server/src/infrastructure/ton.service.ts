@@ -1,7 +1,7 @@
 import axios from 'axios';
-import pkg from './prisma/index.js';
+import pkg from '@prisma/client';
 const { TransactionType } = pkg;
-import type { PrismaClient as IPrismaClient } from './prisma/index.js';
+import type { PrismaClient as IPrismaClient } from '@prisma/client';
 import { UserService } from '../modules/user/user.service.js';
 import { TON_CONFIG } from '../core/constants.js';
 import { ITonService } from './interfaces/ton-service.interface.js';

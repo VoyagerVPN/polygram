@@ -3,7 +3,7 @@
  * Following SOLID: Concrete implementation of ITradeRepository
  */
 
-import { PrismaClient as IPrismaClient, TransactionType, Prisma } from '../../infrastructure/prisma/index.js';
+import { PrismaClient as IPrismaClient, TransactionType, Prisma } from '@prisma/client';
 import { MarketState } from '@polygram/shared';
 import { TradeExecution, TradeResult } from './trade.dto.js';
 import { ITradeRepository } from './trade.repository.interface.js';

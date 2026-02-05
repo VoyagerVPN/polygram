@@ -4,7 +4,7 @@
  */
 
 import type { FC } from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -17,7 +17,8 @@ import {
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
-import { PriceChart } from '@/components/PriceChart';
+// Lazy load PriceChart (heavy dependency: lightweight-charts)
+const PriceChart = lazy(() => import('@/components/PriceChart'));
 import { TradeModal } from '@/components/TradeModal';
 import { usePolygramStore } from '@/store/usePolygramStore';
 import { api } from '@/api/client';
@@ -178,7 +179,9 @@ export const MarketDetailPage: FC = () => {
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
             Price History
           </h3>
-          <PriceChart data={priceHistory} />
+          <Suspense fallback={<div className="h-[120px] flex items-center justify-center text-xs text-white/20">Loading chart...</div>}>
+            <PriceChart data={priceHistory} />
+          </Suspense>
         </motion.section>
 
         {/* Market Info */}

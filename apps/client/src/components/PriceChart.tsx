@@ -7,7 +7,7 @@ interface PriceChartProps {
   data: PriceHistoryPoint[];
 }
 
-export const PriceChart: FC<PriceChartProps> = ({ data }) => {
+const PriceChart: FC<PriceChartProps> = ({ data }) => {
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<ReturnType<typeof createChart> | null>(null);
   const seriesRef = useRef<ISeriesApi<'Area'> | null>(null);
@@ -100,3 +100,5 @@ export const PriceChart: FC<PriceChartProps> = ({ data }) => {
 
   return <div ref={chartContainerRef} className="w-full" />;
 };
+
+export default PriceChart;

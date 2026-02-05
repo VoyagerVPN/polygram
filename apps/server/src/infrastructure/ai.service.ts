@@ -86,7 +86,7 @@ export class AiService {
   async resolveMarket(question: string, context: string): Promise<'YES' | 'NO' | 'UNKNOWN'> {
     try {
       const completion = await this.openai.chat.completions.create({
-        model: 'google/gemini-2.0-flash-001',
+        model: 'openai/gpt-4o-mini',
         messages: [
           {
             role: 'system',

@@ -7,7 +7,7 @@ AI-powered prediction market platform on TON blockchain. Users can bet on future
 
 ## 🚀 Core Features
 
-- **AI Content Engine**: Automated market creation via RSS → Gemini AI → Telegram moderation bot
+- **AI Content Engine**: Automated market creation via RSS → OpenRouter AI → Telegram moderation bot
 - **LMSR Trading**: Logarithmic Market Scoring Rule for dynamic pricing
 - **TON Integration**: TON Connect for wallet authentication and on-chain settlements
 - **Real-time Updates**: WebSocket for live price feeds and trade notifications
@@ -62,7 +62,7 @@ polygram/
 | | Redis | 7.x | Cache & Pub/Sub |
 | | Telegraf | latest | Telegram bot |
 | **WebSocket** | @fastify/websocket | latest | Real-time communication |
-| **AI** | Google Gemini / OpenRouter | latest | Market generation & resolution |
+| **AI** | OpenRouter | latest | Market generation & resolution |
 | **Blockchain** | @ton/core, @ton/crypto | latest | TON interactions |
 | **Testing** | Vitest | 3.x | Unit & integration tests |
 | | @vitest/coverage-v8 | 3.x | Coverage reports |
@@ -179,7 +179,6 @@ REDIS_URL="redis://localhost:6379"
 # Optional
 CRYPTOPANIC_API_KEY="<cryptopanic_api_key>"  # News feed
 ADMIN_CHAT_ID="<telegram_chat_id>"           # Moderation chat
-GEMINI_API_KEY="<gemini_api_key>"            # Alternative AI provider
 TONAPI_KEY="<tonapi_key>"                    # TON monitoring
 APP_WALLET="<ton_wallet_address>"            # Deposit wallet
 ```

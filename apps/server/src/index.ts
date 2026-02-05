@@ -9,7 +9,7 @@ import { MarketModule } from './modules/market/market.module.js';
 import { BotService } from './infrastructure/bot.service.js';
 import { MarketService } from './modules/market/market.service.js';
 import { PrismaMarketRepository } from './infrastructure/prisma-market.repository.js';
-import { PrismaClient } from './infrastructure/prisma/index.js';
+import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 import { NewsService } from './infrastructure/news.service.js';

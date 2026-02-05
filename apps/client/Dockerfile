@@ -4,6 +4,12 @@ FROM node:22-alpine AS builder
 # Install pnpm
 RUN npm install -g pnpm@10
 
+# Build-time env variables
+ARG VITE_API_URL=http://localhost:3001/api
+ARG VITE_WS_URL=ws://localhost:3001/ws
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_WS_URL=${VITE_WS_URL}
+
 WORKDIR /app
 
 # Copy all source files

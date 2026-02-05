@@ -21,7 +21,42 @@ export default defineConfig({
     target: 'esnext',
     minify: 'terser',
     cssMinify: 'lightningcss',
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // Check if this is a node_modules dependency
+          if (id.includes('node_modules')) {
+            // Animation library (heavy, separate chunk)
+            if (id.includes('framer-motion')) {
+              return 'vendor-motion';
+            }
+            // Router
+            if (id.includes('react-router')) {
+              return 'vendor-router';
+            }
+            // State management
+            if (id.includes('zustand')) {
+              return 'vendor-state';
+            }
+            // TON Connect (heavy)
+            if (id.includes('@tonconnect')) {
+              return 'vendor-tonconnect';
+            }
+            // React ecosystem (must be together)
+            if (
+              id.includes('/react/') ||
+              id.includes('/react-dom/') ||
+              id.includes('/scheduler/') ||
+              id.includes('@telegram-apps')
+            ) {
+              return 'vendor-core';
+            }
+          }
+          // Charts loaded via React.lazy automatically creates separate chunk
+        },
+      },
+    },
   },
   future: {
     // Enable Vite 7 future breaking changes for better diagnostics

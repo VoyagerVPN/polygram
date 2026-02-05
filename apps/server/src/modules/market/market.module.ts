@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { MarketService } from './market.service.js';
-import type { PriceHistory, PrismaClient as IPrismaClient } from '../../infrastructure/prisma/index.js';
+import type { PriceHistory, PrismaClient as IPrismaClient } from '@prisma/client';
 import { PRICE_HISTORY_CONFIG } from '../../core/constants.js';
 
 export interface MarketModuleOptions {

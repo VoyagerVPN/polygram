@@ -80,21 +80,9 @@ export interface WSMessage {
 export type WSMessageType = 'MARKET_UPDATE' | 'MARKET_RESOLVED' | 'PING';
 
 // UI Types
-export interface TradeButtonProps {
-  type: 'yes' | 'no';
-  percentage: number;
-  onClick: () => void;
-  disabled?: boolean;
-}
-
 export interface MarketCardProps {
   market: MarketData;
   onTrade: (marketId: string, isYes: boolean) => void;
-}
-
-export interface HeaderProps {
-  balance: number;
-  currency?: string;
 }
 
 // Store Types

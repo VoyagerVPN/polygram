@@ -16,17 +16,8 @@ export const TradeSchema = z.object({
     .max(TRADING_CONFIG.MAX_TRADE_AMOUNT),
 });
 
-export const TradeResponseSchema = z.object({
-  success: z.boolean(),
-  transactionId: z.string().uuid(),
-  sharesReceived: z.number(),
-  price: z.number(),
-  newBalance: z.number(),
-});
-
 // Types derived from schemas
 export type TradeRequest = z.infer<typeof TradeSchema>;
-export type TradeResponse = z.infer<typeof TradeResponseSchema>;
 
 // Domain entities
 export interface TradeExecution {

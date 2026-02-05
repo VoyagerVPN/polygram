@@ -32,7 +32,6 @@ services:
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - CRYPTOPANIC_API_KEY=${CRYPTOPANIC_API_KEY}
       - ADMIN_CHAT_ID=${ADMIN_CHAT_ID}
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
     depends_on:
       - db
       - redis
@@ -41,6 +40,9 @@ services:
     build:
       context: .
       dockerfile: apps/client/Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-/api}
+        VITE_WS_URL: ${VITE_WS_URL:-/ws}
     restart: always
     ports:
       - "80:80"
