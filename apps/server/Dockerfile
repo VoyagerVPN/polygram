@@ -4,8 +4,7 @@ FROM node:22-alpine AS builder
 # Install pnpm
 RUN npm install -g pnpm@10
 ENV CI=true
-# Prisma 7 uses WASM by default, no native engines needed
-# Dummy DATABASE_URL is required for Prisma 7 config validation during 'prisma generate'
+# Dummy DATABASE_URL is required for Prisma config validation during 'prisma generate'
 ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/unused"
 
 WORKDIR /app
@@ -17,32 +16,33 @@ COPY . .
 RUN pnpm install --frozen-lockfile
 
 # Generate Prisma Client and build all packages
-# The client is now generated INTO src/infrastructure/prisma
 RUN pnpm -F @polygram/server db:generate && pnpm -r build
 
-# Prisma client is generated in node_modules (default location)
+# Copy generated Prisma Client to dist for correct relative paths
+RUN cp -r /app/apps/server/src/generated /app/apps/server/dist/
 
 # Isolate the server package into /isolated
 RUN pnpm --filter @polygram/server deploy --legacy --prod /isolated
 
 # Production stage
 FROM node:22-alpine AS production
-# openssl is no longer needed for Prisma 7 Rust-free (WASM) client
+
 WORKDIR /app
 
 # Copy the isolated package package.json and node_modules
 COPY --from=builder /isolated .
 
-# Copy the build artifacts (including the generated and compiled Prisma client)
+# Copy the build artifacts (includes generated Prisma Client in dist/generated)
 COPY --from=builder /app/apps/server/dist ./dist
+
+# Copy generated Prisma Client to node_modules for runtime
+COPY --from=builder /app/apps/server/src/generated/prisma ./node_modules/.prisma/client
+
 # Shared package dist
 COPY --from=builder /app/packages/shared/dist ./node_modules/@polygram/shared/dist
 
 # Prisma schema for migrations
-COPY --from=builder /app/apps/server/prisma ./prisma
-
-# Generate Prisma Client in production stage (pnpm deploy doesn't copy generated .prisma/client)
-RUN npx prisma generate
+COPY --from=builder /app/apps/server/prisma/schema.prisma ./prisma/
 
 # Expose port
 EXPOSE 3000

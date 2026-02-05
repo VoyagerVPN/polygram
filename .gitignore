@@ -42,3 +42,5 @@ AGENTS.md
 
 # Test coverage
 coverage/
+# Prisma generated client
+apps/server/src/generated/
