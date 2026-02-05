@@ -9,7 +9,9 @@ import { MarketModule } from './modules/market/market.module.js';
 import { BotService } from './infrastructure/bot.service.js';
 import { MarketService } from './modules/market/market.service.js';
 import { PrismaMarketRepository } from './infrastructure/prisma-market.repository.js';
-import { PrismaClient } from '@prisma/client';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+const { PrismaClient } = require('./generated/prisma/index.js');
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
 import { NewsService } from './infrastructure/news.service.js';
@@ -71,10 +73,10 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 // Decorate fastify with prisma for global access (DRY)
-fastify.decorate('prisma', prisma);
+fastify.decorate('prisma', prisma as any);
 
-const repository = new PrismaMarketRepository(prisma);
-const userService = new UserServiceImpl(prisma);
+const repository = new PrismaMarketRepository(prisma as any);
+const userService = new UserServiceImpl(prisma as any);
 const marketService = new MarketService(repository, userService);
 const authService = new AuthService();
 
@@ -99,7 +101,7 @@ const automation = new AutomationService(
 bot.setAutomation(automation);
 
 const resolutionService = new ResolutionService(
-  prisma,
+  prisma as any,
   marketService,
   aiService,
   newsService,
@@ -113,7 +115,7 @@ let mockTonService: IMockTonService | undefined;
 
 if (useMockTon) {
   console.log('[Server] Using MOCK TON Service');
-  mockTonService = new MockTonService(userService, prisma);
+  mockTonService = new MockTonService(userService, prisma as any);
   tonService = mockTonService;
   bot.setMockTonService(mockTonService);
 } else {
@@ -122,7 +124,7 @@ if (useMockTon) {
     process.env.TONAPI_KEY || '',
     process.env.APP_WALLET || '',
     userService,
-    prisma
+    prisma as any
   );
 }
 
@@ -163,7 +165,7 @@ try {
 // Register Modules (SOLID: Each module is responsible for its domain)
 await fastify.register(MarketModule, { 
   prefix: '/api/markets',
-  prisma,
+  prisma: prisma as any,
   service: marketService
 });
 
@@ -181,13 +183,13 @@ await fastify.register(async (instance, _opts) => {
   // Trade Module
   await instance.register(TradeModule, {
     prefix: '/trades',
-    prisma,
+    prisma: prisma as any,
   });
   
   // Portfolio Module
   await instance.register(PortfolioModule, {
     prefix: '/portfolio',
-    prisma,
+    prisma: prisma as any,
   });
 }, { prefix: '/api' });
 

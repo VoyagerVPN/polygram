@@ -1,7 +1,9 @@
 import axios from 'axios';
-import pkg from '@prisma/client';
-const { TransactionType } = pkg;
-import type { PrismaClient as IPrismaClient } from '@prisma/client';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url);
+import type * as PrismaNamespace from '../generated/prisma/index.js';
+const { TransactionType } = require('../generated/prisma/index.js') as typeof PrismaNamespace;
+import type { PrismaClient as IPrismaClient } from '../generated/prisma/index.js';
 import { UserService } from '../modules/user/user.service.js';
 import { TON_CONFIG } from '../core/constants.js';
 import { ITonService } from './interfaces/ton-service.interface.js';

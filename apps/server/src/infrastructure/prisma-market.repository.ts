@@ -1,4 +1,4 @@
-import type { Market, PrismaClient as IPrismaClient, MarketStatus as IMarketStatus } from '@prisma/client';
+import type { Market, PrismaClient as IPrismaClient, MarketStatus as IMarketStatus } from '../generated/prisma/index.js';
 import { MarketState } from '@polygram/shared';
 import { IMarketRepository, MarketData } from '../modules/market/market.service.js';
 import { MarketProposal } from '../infrastructure/ai.service.js';

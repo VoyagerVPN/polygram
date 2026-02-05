@@ -31,6 +31,6 @@ export default [
     },
   },
   {
-    ignores: ['dist/', 'node_modules/', 'prisma/', '**/*.test.ts', '**/test/**'],
+    ignores: ['dist/', 'node_modules/', 'prisma/', 'src/generated/', '**/*.test.ts', '**/test/**'],
   },
 ];

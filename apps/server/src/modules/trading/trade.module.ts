@@ -20,7 +20,7 @@ export default async function TradeModule(
   const { prisma } = options;
 
   // Dependency Injection
-  const repository = new PrismaTradeRepository(prisma);
+  const repository = new PrismaTradeRepository(prisma as any);
   const service = new TradeService(repository);
   const controller = new TradeController(service);
 

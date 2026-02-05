@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient as IPrismaClient } from '@prisma/client';
+import type { Prisma, PrismaClient as IPrismaClient } from '../generated/prisma/index.js';
 import { RESOLUTION_CONFIG } from '../core/constants.js';
 
 type Outcome = 'YES' | 'NO';
