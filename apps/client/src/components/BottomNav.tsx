@@ -11,10 +11,10 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { id: 'markets', icon: BarChart3, label: 'Markets', path: '/' },
-  { id: 'leaderboard', icon: Trophy, label: 'Top', path: '/leaderboard' },
-  { id: 'portfolio', icon: PieChart, label: 'Portfolio', path: '/portfolio' },
-  { id: 'menu', icon: User, label: 'Menu', path: '/menu' },
+  { id: 'markets', icon: BarChart3, label: 'Рынки', path: '/' },
+  { id: 'leaderboard', icon: Trophy, label: 'Топ', path: '/leaderboard' },
+  { id: 'portfolio', icon: PieChart, label: 'Портфель', path: '/portfolio' },
+  { id: 'menu', icon: User, label: 'Меню', path: '/menu' },
 ];
 
 export const BottomNav: FC = () => {

@@ -63,17 +63,40 @@ export async function init(options: {
   }
 
   // Mount all components used in the project.
-  mountBackButton();
+  try {
+    mountBackButton();
+  } catch (e) {
+    console.warn('Failed to mount BackButton', e);
+  }
+  
   restoreInitData();
 
   if (isMiniAppSupported()) {
-    mountMiniApp();
-    mountThemeParams();
-    bindThemeParamsCssVars();
-    bindMiniAppCssVars();
-    miniAppReady();
+    try {
+      await mountMiniApp();
+      bindMiniAppCssVars();
+    } catch (e) {
+      console.warn('Failed to mount MiniApp', e);
+    }
+
+    try {
+      await mountThemeParams();
+      bindThemeParamsCssVars();
+    } catch (e) {
+      console.warn('Failed to mount ThemeParams', e);
+    }
+
+    try {
+      miniAppReady();
+    } catch (e) {
+      console.warn('Failed to signal miniAppReady', e);
+    }
   }
 
-  await mountViewport();
-  bindViewportCssVars();
+  try {
+    await mountViewport();
+    bindViewportCssVars();
+  } catch (e) {
+    console.warn('Failed to mount Viewport', e);
+  }
 }

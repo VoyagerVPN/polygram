@@ -63,7 +63,15 @@ export class PortfolioService implements IPortfolioService {
     });
 
     if (!user) {
-      throw new Error('User not found');
+      // Return default empty data instead of throwing error
+      return {
+        totalBalance: 0,
+        availableBalance: 0,
+        investedAmount: 0,
+        unrealizedPnL: 0,
+        winRate: 0,
+        totalTrades: 0,
+      };
     }
 
     // Calculate invested amount

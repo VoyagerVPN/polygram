@@ -1,10 +1,10 @@
 import type { FC } from 'react';
 import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { TrendingUp, Share2 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { usePolygramStore } from '@/store/usePolygramStore';
+import { Card, IconButton, TabButton } from '@/components/ui';
 
 // Mock leaderboard data
 const topTraders = [
@@ -35,35 +35,28 @@ export const LeaderboardPage: FC = () => {
       
       <main className="relative z-10 pt-16 pb-36 px-4 max-w-md mx-auto">
         {/* Period Filter */}
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex justify-center mb-10"
-        >
+        <div className="flex justify-center mb-10">
           <div className="flex p-1 bg-[#1c2631] border border-white/5 rounded-2xl">
             {periods.map((period) => (
-              <motion.button
+              <TabButton
                 key={period}
+                isActive={activePeriod === period}
                 onClick={() => setActivePeriod(period)}
-                whileTap={{ scale: 0.95 }}
-                className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${
-                  activePeriod === period 
-                    ? 'bg-[var(--app-primary)] text-white shadow-[0_4px_12px_rgba(50,137,236,0.3)]' 
-                    : 'text-slate-500 hover:text-slate-300'
-                }`}
+                className="flex-initial px-6"
               >
                 {period}
-              </motion.button>
+              </TabButton>
             ))}
           </div>
-        </motion.div>
+        </div>
 
         {/* Top 3 Podium */}
-        <motion.div 
+        <Card 
+          variant="flat" 
+          padding="lg"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="flex items-end justify-between gap-2 pt-6 pb-12 px-6"
+          className="flex items-end justify-between gap-2 pt-6 pb-12 px-6 mb-6"
         >
           {/* Rank 2 */}
           <div className="flex flex-col items-center flex-1">
@@ -109,20 +102,18 @@ export const LeaderboardPage: FC = () => {
             <p className="text-[11px] font-bold text-white mb-1 truncate w-20 text-center">{topTraders[2].username}</p>
             <p className="text-[10px] font-black text-[var(--app-success)]">+{topTraders[2].profit.toFixed(0)} TON</p>
           </div>
-        </motion.div>
+        </Card>
 
         {/* Other Traders List */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="space-y-3"
-        >
+        <div className="space-y-3">
           {otherTraders.map((trader) => (
-            <motion.div 
+            <Card
               key={trader.rank}
-              whileTap={{ scale: 0.98 }}
-              className="flex items-center gap-4 h-20 px-5 bg-[#1c2631]/40 rounded-2xl border border-white/5 backdrop-blur-sm"
+              variant="flat"
+              padding="md"
+              radius="2xl"
+              isInteractive
+              className="flex items-center gap-4 h-20 px-5"
             >
               <span className="w-5 text-sm font-black text-slate-500 tabular-nums">{trader.rank}</span>
               <div className="w-12 h-12 rounded-full border border-white/10 p-0.5 overflow-hidden">
@@ -148,18 +139,18 @@ export const LeaderboardPage: FC = () => {
                 <p className="text-sm font-black text-[var(--app-success)] tabular-nums">+{trader.profit.toFixed(0)}</p>
                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">TON</p>
               </div>
-            </motion.div>
+            </Card>
           ))}
-        </motion.div>
+        </div>
       </main>
 
       {/* User Rank Card - Sticky Bottom above nav */}
-      <motion.div 
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-[104px] left-4 right-4 z-[60] max-w-md mx-auto"
-      >
-        <div className="bg-[#1c2631] border border-[var(--app-primary)]/40 shadow-[0_12px_40px_rgba(0,0,0,0.6)] rounded-3xl px-5 py-4 flex items-center gap-4 backdrop-blur-xl">
+      <div className="fixed bottom-[104px] left-4 right-4 z-[60] max-w-md mx-auto">
+        <Card 
+          variant="surface" 
+          radius="3xl"
+          className="px-5 py-4 flex items-center gap-4 border-[var(--app-primary)]/40 shadow-[0_12px_40px_rgba(0,0,0,0.6)]"
+        >
           <div className="flex items-center justify-center size-12 rounded-2xl bg-[var(--app-primary)]/20 border border-[var(--app-primary)]/30">
             <span className="text-xl font-black text-[var(--app-primary)] tabular-nums">{userRank}</span>
           </div>
@@ -174,14 +165,14 @@ export const LeaderboardPage: FC = () => {
               Profit: <span className="text-[var(--app-success)] font-black tabular-nums">+{userProfit.toFixed(1)} TON</span>
             </p>
           </div>
-          <motion.button 
-            className="size-11 flex items-center justify-center rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 active:scale-95 transition-all"
-            whileTap={{ scale: 0.9 }}
-          >
-            <Share2 className="w-5 h-5 text-slate-400" />
-          </motion.button>
-        </div>
-      </motion.div>
+          <IconButton
+            icon={<Share2 className="w-5 h-5 text-slate-400" />}
+            aria-label="Поделиться"
+            variant="secondary"
+            size="md"
+          />
+        </Card>
+      </div>
 
       <BottomNav />
     </div>

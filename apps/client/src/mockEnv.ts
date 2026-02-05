@@ -17,8 +17,14 @@ declare global {
 // It is important, to mock the environment only for development purposes. When building the
 // application, import.meta.env.DEV will become false, and the code inside will be tree-shaken,
 // but we keep it for localhost to allow testing production-like builds.
-if (import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-  if (!isTMA()) {
+const isTunnel = window.location.hostname.includes('cloudpub.ru') || window.location.hostname.includes('trycloudflare.com');
+
+if (import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || isTunnel) {
+  // Always log attempt
+  console.log('[MockEnv] Checking environment...', { isTMA: isTMA(), isTunnel });
+  
+  if (!isTMA() || isTunnel) {
+    console.log('[MockEnv] Applying Telegram mock environment');
     const themeParams = {
       accent_text_color: '#6ab2f2',
       bg_color: '#17212b',

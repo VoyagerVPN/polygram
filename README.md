@@ -2,6 +2,9 @@
 
 [![wakatime](https://wakatime.com/badge/user/1717ffce-a05a-4082-a46e-75fb9a96f23d/project/7d7a3c55-6095-4e62-973d-a7eadfbe355d.svg)](https://wakatime.com/badge/user/1717ffce-a05a-4082-a46e-75fb9a96f23d/project/7d7a3c55-6095-4e62-973d-a7eadfbe355d)
 [![CI](https://github.com/VoyagerVPN/polygram/actions/workflows/ci.yml/badge.svg)](https://github.com/VoyagerVPN/polygram/actions/workflows/ci.yml)
+[![Demo](https://img.shields.io/badge/status-demo-yellow.svg)](https://t.me/polygram_bot)
+
+> ⚠️ **Demo Mode**: This project is currently in active development. Features and APIs may change without notice.
 
 AI-powered prediction market platform on TON blockchain. Users can bet on future events (Yes/No markets) using an off-chain trading engine with LMSR (Logarithmic Market Scoring Rule) mathematics.
 
@@ -13,6 +16,7 @@ AI-powered prediction market platform on TON blockchain. Users can bet on future
 - **Real-time Updates**: WebSocket for live price feeds and trade notifications
 - **Auto-resolution**: AI-driven market resolution with manual admin override
 - **Telegram Mini App**: Native Telegram experience with glassmorphism design
+- **Unified UI System**: Consistent component library with design tokens
 
 ## 📁 Project Structure
 
@@ -23,6 +27,10 @@ polygram/
 │   │   ├── src/
 │   │   │   ├── api/         # HTTP client & WebSocket handlers
 │   │   │   ├── components/  # React components
+│   │   │   │   └── ui/      # Unified UI component system
+│   │   │   │       ├── Button/      # Button components
+│   │   │   │       ├── Card/        # Card containers
+│   │   │   │       └── Feedback/    # Loading, Error, Empty states
 │   │   │   ├── hooks/       # Custom hooks (useLMSR, useMarkets, useRealtime)
 │   │   │   ├── pages/       # Route-level pages
 │   │   │   └── store/       # Zustand store
@@ -49,13 +57,14 @@ polygram/
 | Layer | Technology | Version | Purpose |
 |-------|------------|---------|---------|
 | **Monorepo** | pnpm workspaces | 10.x | Package management & workspace linking |
-| **Client** | React | 18.x | UI library |
+| **Client** | React | 19.x | UI library |
 | | Vite | 6.x | Build tool |
 | | TypeScript | 5.x | Type safety |
-| | Zustand | 4.x | State management |
-| | Tailwind CSS | 3.x | Styling |
+| | Zustand | 5.x | State management |
+| | Tailwind CSS | 4.x | Styling |
+| | Framer Motion | 12.x | Animations |
 | | @telegram-apps/telegram-ui | latest | Telegram-native UI |
-| | lightweight-charts | 4.x | Price history charts |
+| | lightweight-charts | 5.x | Price history charts |
 | **Backend** | Fastify | 5.x | API server |
 | | Prisma | 6.x | Database ORM |
 | | PostgreSQL | 15.x | Primary database |
@@ -68,6 +77,28 @@ polygram/
 | | @vitest/coverage-v8 | 3.x | Coverage reports |
 
 ## 🏗 Architecture
+
+### UI Component System
+
+Unified design system with consistent tokens:
+
+```tsx
+// Button variants
+<Button variant="primary">Primary</Button>
+<Button variant="secondary">Secondary</Button>
+<TradeButton outcome="YES" price={65} />
+<PredictionButton outcome="NO" />
+
+// Card variants  
+<Card variant="glass">Glassmorphism</Card>
+<Card variant="flat">Flat panel</Card>
+<Card variant="surface">Surface background</Card>
+
+// Feedback
+<LoadingSpinner size="lg" />
+<ErrorMessage onRetry={refetch} />
+<EmptyState icon="search" title="No markets found" />
+```
 
 ### LMSR (Logarithmic Market Scoring Rule)
 

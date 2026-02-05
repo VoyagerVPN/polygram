@@ -16,8 +16,11 @@ import './mockEnv.ts';
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
+console.log('[App] Starting...');
+
 try {
   const launchParams = retrieveLaunchParams();
+  console.log('[App] Launch params retrieved:', launchParams.tgWebAppPlatform);
   const platform = launchParams.tgWebAppPlatform;
   const debug = (launchParams.tgWebAppStartParam || '').includes('debug')
     || import.meta.env.DEV;
@@ -34,6 +37,7 @@ try {
       <Root />
     </StrictMode>,
   );
-} catch {
-  root.render(<EnvUnsupported />);
+} catch (e) {
+  console.error('[App] Initialization error:', e);
+  root.render(<EnvUnsupported error={e} />);
 }

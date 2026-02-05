@@ -10,13 +10,21 @@
   
   /* App-specific colors - Design System */
   --color-app-primary: #3289ec;
+  --color-app-primary-glow: rgba(50, 137, 236, 0.5);
+  
   --color-app-success: #0bda5e;
   --color-app-success-bg: rgba(11, 218, 94, 0.1);
+  --color-app-success-glow: rgba(11, 218, 94, 0.5);
+  
   --color-app-danger: #ff4b4b;
   --color-app-danger-bg: rgba(255, 75, 75, 0.1);
+  --color-app-danger-glow: rgba(255, 75, 75, 0.5);
+  
   --color-app-card-bg: #1c2631;
   --color-app-surface-bg: #161C26;
-  --color-app-border: rgba(255, 255, 255, 0.05);
+  --color-app-border: rgba(255, 255, 255, 0.08);
+  --color-app-glass-bg: rgba(255, 255, 255, 0.03);
+  --color-app-glass-border: rgba(255, 255, 255, 0.1);
   
   --color-app-gold: #FACC15;
   --color-app-silver: #94A3B8;
@@ -88,19 +96,18 @@ body {
   
   /* Card Glass Style - Screen 1 */
   .glass-card {
-    background: rgba(28, 38, 49, 0.4);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 
-      0 4px 24px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      0 8px 32px 0 rgba(0, 0, 0, 0.37);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .glass-card:hover {
-    background: rgba(28, 38, 49, 0.5);
-    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.15);
     transform: translateY(-2px);
   }
   

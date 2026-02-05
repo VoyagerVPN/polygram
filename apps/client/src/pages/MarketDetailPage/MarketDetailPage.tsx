@@ -1,29 +1,29 @@
-/**
- * Market Detail Page
- * Shows detailed market information with trading functionality
- */
-
 import type { FC } from 'react';
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { 
   TrendingUp, 
   TrendingDown, 
   Clock, 
   Users, 
-  AlertCircle,
   Info
 } from 'lucide-react';
 import { Header } from '@/components/Header';
-import { BottomNav } from '@/components/BottomNav';
-// Lazy load PriceChart (heavy dependency: lightweight-charts)
-const PriceChart = lazy(() => import('@/components/PriceChart'));
 import { TradeModal } from '@/components/TradeModal';
 import { usePolygramStore } from '@/store/usePolygramStore';
 import { api } from '@/api/client';
 import type { MarketData, PriceHistoryPoint } from '@/types';
-import { formatNumber, formatTimeLeft } from '@/helpers/format';
+import { formatNumber } from '@/helpers/format';
+import { 
+  Card, 
+  TradeButton,
+  LoadingSpinner,
+  ErrorMessage 
+} from '@/components/ui';
+
+// Lazy load PriceChart (heavy dependency)
+const PriceChart = lazy(() => import('@/components/PriceChart'));
 
 export const MarketDetailPage: FC = () => {
   const { marketId } = useParams<{ marketId: string }>();
@@ -72,17 +72,16 @@ export const MarketDetailPage: FC = () => {
 
   const handleTradeComplete = () => {
     setIsTradeModalOpen(false);
-    fetchMarketData(); // Refresh market data after trade
+    fetchMarketData();
   };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[var(--tg-theme-secondary-bg-color,#0b0e11)]">
-        <Header title="Market" showBackButton onBack={() => navigate('/')} />
+        <Header title="Рынок" showBackButton onBack={() => navigate('/')} />
         <div className="flex items-center justify-center h-[60vh]">
-          <div className="w-8 h-8 border-2 border-[var(--app-primary)] border-t-transparent rounded-full animate-spin" />
+          <LoadingSpinner size="lg" />
         </div>
-        <BottomNav />
       </div>
     );
   }
@@ -90,18 +89,14 @@ export const MarketDetailPage: FC = () => {
   if (error || !market) {
     return (
       <div className="min-h-screen bg-[var(--tg-theme-secondary-bg-color,#0b0e11)]">
-        <Header title="Market" showBackButton onBack={() => navigate('/')} />
+        <Header title="Рынок" showBackButton onBack={() => navigate('/')} />
         <div className="flex flex-col items-center justify-center h-[60vh] px-4">
-          <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-          <p className="text-slate-400 text-center">{error || 'Market not found'}</p>
-          <button 
-            onClick={fetchMarketData}
-            className="mt-4 px-6 py-2 bg-[var(--app-primary)] rounded-xl text-white font-bold"
-          >
-            Retry
-          </button>
+          <ErrorMessage
+            title={error ? 'Ошибка загрузки' : 'Рынок не найден'}
+            message={error ? 'Не удалось загрузить данные рынка' : 'Запрашиваемый рынок не существует'}
+            onRetry={fetchMarketData}
+          />
         </div>
-        <BottomNav />
       </div>
     );
   }
@@ -114,7 +109,7 @@ export const MarketDetailPage: FC = () => {
   return (
     <div className="min-h-screen bg-[var(--tg-theme-secondary-bg-color,#0b0e11)]">
       <Header 
-        title="Market Details" 
+        title="Детали рынка" 
         showBackButton 
         onBack={() => navigate('/')} 
         balance={userBalance}
@@ -122,11 +117,7 @@ export const MarketDetailPage: FC = () => {
 
       <main className="relative z-10 pt-16 pb-32 px-4 max-w-md mx-auto">
         {/* Market Question Card */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="glass-card rounded-2xl p-5 mb-4"
-        >
+        <Card variant="glass" className="mb-4">
           <h1 className="text-xl font-bold text-white leading-tight mb-4">
             {market.question}
           </h1>
@@ -134,128 +125,110 @@ export const MarketDetailPage: FC = () => {
           <div className="flex items-center gap-4 text-xs text-slate-400">
             <div className="flex items-center gap-1">
               <Clock className="w-3.5 h-3.5" />
-              <span>Ends {formatTimeLeft(market.expiresAt)}</span>
+              <span>До {new Date(market.expiresAt).toLocaleDateString('ru-RU')}</span>
             </div>
             <div className="flex items-center gap-1">
               <Users className="w-3.5 h-3.5" />
-              <span>{formatNumber(market.qYes + market.qNo)} TON Vol</span>
+              <span>{formatNumber(market.qYes + market.qNo)} TON Объём</span>
             </div>
           </div>
-        </motion.section>
+        </Card>
 
         {/* Price Display */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-2 gap-3 mb-4"
-        >
-          <div className="glass-card rounded-xl p-4 border-l-4 border-[var(--app-success)]">
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <Card 
+            variant="glass" 
+            padding="md" 
+            radius="xl"
+            className="border-l-4 border-l-[var(--app-success)]"
+          >
             <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="w-4 h-4 text-[var(--app-success)]" />
-              <span className="text-xs font-bold text-slate-400 uppercase">Yes</span>
+              <span className="text-xs font-bold text-slate-400 uppercase">Да</span>
             </div>
             <div className="text-2xl font-black text-white">{yesPercent}¢</div>
-            <div className="text-xs text-slate-500">Probability</div>
-          </div>
+            <div className="text-xs text-slate-500">Вероятность</div>
+          </Card>
           
-          <div className="glass-card rounded-xl p-4 border-l-4 border-[var(--app-danger)]">
+          <Card 
+            variant="glass" 
+            padding="md" 
+            radius="xl"
+            className="border-l-4 border-l-[var(--app-danger)]"
+          >
             <div className="flex items-center gap-2 mb-1">
               <TrendingDown className="w-4 h-4 text-[var(--app-danger)]" />
-              <span className="text-xs font-bold text-slate-400 uppercase">No</span>
+              <span className="text-xs font-bold text-slate-400 uppercase">Нет</span>
             </div>
             <div className="text-2xl font-black text-white">{noPercent}¢</div>
-            <div className="text-xs text-slate-500">Probability</div>
-          </div>
-        </motion.section>
+            <div className="text-xs text-slate-500">Вероятность</div>
+          </Card>
+        </div>
 
         {/* Price Chart */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="glass-card rounded-2xl p-4 mb-4"
-        >
+        <Card variant="glass" className="mb-4">
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">
-            Price History
+            История цены
           </h3>
-          <Suspense fallback={<div className="h-[120px] flex items-center justify-center text-xs text-white/20">Loading chart...</div>}>
+          <Suspense fallback={
+            <div className="h-[120px] flex items-center justify-center text-xs text-white/20">
+              Загрузка графика...
+            </div>
+          }>
             <PriceChart data={priceHistory} />
           </Suspense>
-        </motion.section>
+        </Card>
 
         {/* Market Info */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="glass-card rounded-2xl p-5 mb-4"
-        >
+        <Card variant="glass" className="mb-4">
           <div className="flex items-start gap-3">
-            <Info className="w-5 h-5 text-[var(--app-primary)] mt-0.5" />
+            <Info className="w-5 h-5 text-[var(--app-primary)] mt-0.5 shrink-0" />
             <div>
-              <h3 className="text-sm font-bold text-white mb-2">About this market</h3>
+              <h3 className="text-sm font-bold text-white mb-2">Об этом рынке</h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                {market.description || 'This market will resolve based on verified sources at the specified end date. The outcome is determined by consensus from reliable data sources.'}
+                {market.description || 'Этот рынок разрешится на основе проверенных источников в указанную дату окончания. Исход определяется консенсусом надежных источников данных.'}
               </p>
             </div>
           </div>
-        </motion.section>
+        </Card>
 
         {/* Resolution Criteria */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="glass-card rounded-2xl p-5"
-        >
+        <Card variant="glass">
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
-            Resolution Criteria
+            Критерии разрешения
           </h3>
           <ul className="space-y-2 text-xs text-slate-400">
             <li className="flex items-start gap-2">
               <span className="text-[var(--app-primary)]">•</span>
-              <span>Market resolves when the specified date is reached</span>
+              <span>Рынок разрешается при наступлении указанной даты</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-[var(--app-primary)]">•</span>
-              <span>Outcome determined by verified external data sources</span>
+              <span>Исход определяется проверенными внешними источниками</span>
             </li>
             <li className="flex items-start gap-2">
               <span className="text-[var(--app-primary)]">•</span>
-              <span>In case of disputes, AI oracle makes final decision</span>
+              <span>В случае споров финальное решение принимает AI-оракул</span>
             </li>
           </ul>
-        </motion.section>
+        </Card>
       </main>
 
       {/* Fixed Trade Buttons */}
-      <motion.div 
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        className="fixed bottom-[88px] left-4 right-4 z-50 max-w-md mx-auto"
-      >
-        <div className="glass-card rounded-2xl p-4 flex gap-3">
-          <motion.button
-            className="flex-1 bg-[var(--app-success)] text-white py-4 rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(11,218,94,0.3)]"
-            whileTap={{ scale: 0.98 }}
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0b0e11]/80 backdrop-blur-xl border-t border-white/5 pt-4 pb-safe px-4">
+        <div className="max-w-md mx-auto flex gap-3">
+          <TradeButton 
+            outcome="YES" 
+            price={yesPercent}
             onClick={() => handleTrade('YES')}
-          >
-            <TrendingUp className="w-4 h-4" />
-            Buy Yes {yesPercent}¢
-          </motion.button>
-          <motion.button
-            className="flex-1 bg-[var(--app-danger)] text-white py-4 rounded-xl font-black text-sm flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(255,59,48,0.3)]"
-            whileTap={{ scale: 0.98 }}
+          />
+          <TradeButton 
+            outcome="NO" 
+            price={noPercent}
             onClick={() => handleTrade('NO')}
-          >
-            <TrendingDown className="w-4 h-4" />
-            Buy No {noPercent}¢
-          </motion.button>
+          />
         </div>
-      </motion.div>
-
-      <BottomNav />
+      </div>
 
       {/* Trade Modal */}
       <AnimatePresence>

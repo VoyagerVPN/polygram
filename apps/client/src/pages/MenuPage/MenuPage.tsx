@@ -1,5 +1,4 @@
 import type { FC } from 'react';
-import { motion } from 'framer-motion';
 import { 
   History, Trophy, Users, Wallet, Receipt, Bell, 
   Globe, DollarSign, Moon, BookOpen, BarChart3, Headphones,
@@ -8,6 +7,7 @@ import {
 import { Header } from '@/components/Header';
 import { BottomNav } from '@/components/BottomNav';
 import { usePolygramStore } from '@/store/usePolygramStore';
+import { Card, IconButton, Badge } from '@/components/ui';
 
 interface MenuItem {
   label: string;
@@ -64,15 +64,13 @@ export const MenuPage: FC = () => {
       <Header title="Menu" balance={userBalance} />
       
       <main className="relative z-10 pt-16 pb-28 px-4 max-w-md mx-auto">
-        {/* Profile Summary Card - Screen 4 */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative group overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#1c2631] to-[#161C26] border border-white/5 shadow-2xl p-8 mb-8"
+        {/* Profile Summary Card */}
+        <Card 
+          variant="surface" 
+          radius="3xl"
+          padding="xl"
+          className="mb-8 overflow-hidden"
         >
-          {/* Glass Overlay Effect */}
-          <div className="absolute inset-0 bg-white/[0.02] pointer-events-none" />
-          
           <div className="relative flex flex-col items-center">
             {/* Avatar with Halo Effect */}
             <div className="relative mb-6">
@@ -104,11 +102,9 @@ export const MenuPage: FC = () => {
                 <span className="text-white">82%</span>
               </div>
               <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                <motion.div 
-                  className="h-full bg-[var(--app-primary)] shadow-[0_0_15px_rgba(50,137,236,0.4)]" 
+                <div 
+                  className="h-full bg-[var(--app-primary)] shadow-[0_0_15px_rgba(50,137,236,0.4)] transition-all duration-1000"
                   style={{ width: '82%' }}
-                  initial={{ width: 0 }}
-                  animate={{ width: '82%' }}
                 />
               </div>
               <p className="text-[10px] text-slate-500 font-medium text-center">
@@ -116,18 +112,12 @@ export const MenuPage: FC = () => {
               </p>
             </div>
           </div>
-        </motion.div>
+        </Card>
 
         {/* Menu Sections */}
         <div className="space-y-10">
-          {menuSections.map((section, sectionIdx) => (
-            <motion.div 
-              key={section.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + sectionIdx * 0.1 }}
-              className="space-y-4"
-            >
+          {menuSections.map((section) => (
+            <div key={section.title} className="space-y-4">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 px-2 flex items-center justify-between">
                 <span>{section.title}</span>
                 <div className="h-px bg-white/5 flex-1 ml-4" />
@@ -137,10 +127,13 @@ export const MenuPage: FC = () => {
                 {section.items.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <motion.button
+                    <Card
                       key={item.label}
-                      className="w-full flex items-center gap-5 p-5 bg-[#1c2631]/40 hover:bg-[#1c2631]/60 transition-all rounded-[1.25rem] border border-white/[0.03] text-left active:scale-[0.98] group"
-                      whileTap={{ scale: 0.98 }}
+                      variant="flat"
+                      padding="md"
+                      radius="2xl"
+                      isInteractive
+                      className="w-full flex items-center gap-5 px-5 text-left group"
                     >
                       <div className="w-12 h-12 rounded-2xl bg-[var(--app-primary)]/10 flex items-center justify-center shrink-0 border border-[var(--app-primary)]/10 shadow-inner group-hover:bg-[var(--app-primary)]/20 transition-colors">
                         <Icon className="w-6 h-6 text-[var(--app-primary)]" />
@@ -151,9 +144,7 @@ export const MenuPage: FC = () => {
                             {item.label}
                           </p>
                           {item.badge && (
-                            <span className="bg-[var(--app-success)]/20 text-[var(--app-success)] text-[8px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest">
-                              {item.badge}
-                            </span>
+                            <Badge variant="success" size="sm">{item.badge}</Badge>
                           )}
                         </div>
                         <p className="text-xs text-slate-500 font-medium truncate opacity-80">
@@ -161,45 +152,40 @@ export const MenuPage: FC = () => {
                         </p>
                       </div>
                       <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-slate-400 group-hover:translate-x-1 transition-all" />
-                    </motion.button>
+                    </Card>
                   );
                 })}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* Footer */}
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="pt-8 pb-4 flex flex-col items-center gap-4"
-        >
+        <div className="pt-8 pb-4 flex flex-col items-center gap-4">
           <div className="flex gap-6">
-            <motion.button 
-              className="w-10 h-10 rounded-full bg-[var(--tg-theme-section-bg-color,#151b21)] flex items-center justify-center text-[var(--tg-theme-hint-color,#7a8b99)]"
-              whileTap={{ scale: 0.9 }}
-            >
-              <Share2 className="w-5 h-5" />
-            </motion.button>
-            <motion.button 
-              className="w-10 h-10 rounded-full bg-[var(--tg-theme-section-bg-color,#151b21)] flex items-center justify-center text-[var(--tg-theme-hint-color,#7a8b99)]"
-              whileTap={{ scale: 0.9 }}
-            >
-              <Star className="w-5 h-5" />
-            </motion.button>
-            <motion.button 
-              className="w-10 h-10 rounded-full bg-[var(--tg-theme-section-bg-color,#151b21)] flex items-center justify-center text-[var(--tg-theme-hint-color,#7a8b99)]"
-              whileTap={{ scale: 0.9 }}
-            >
-              <FileText className="w-5 h-5" />
-            </motion.button>
+            <IconButton
+              icon={<Share2 className="w-5 h-5 text-slate-400" />}
+              aria-label="Поделиться"
+              variant="secondary"
+              size="lg"
+            />
+            <IconButton
+              icon={<Star className="w-5 h-5 text-slate-400" />}
+              aria-label="Избранное"
+              variant="secondary"
+              size="lg"
+            />
+            <IconButton
+              icon={<FileText className="w-5 h-5 text-slate-400" />}
+              aria-label="Документы"
+              variant="secondary"
+              size="lg"
+            />
           </div>
           <p className="text-[10px] text-[var(--tg-theme-hint-color,#7a8b99)]/60 font-medium uppercase tracking-widest">
             Polygram Markets v1.2.4
           </p>
-        </motion.div>
+        </div>
       </main>
 
       <BottomNav />

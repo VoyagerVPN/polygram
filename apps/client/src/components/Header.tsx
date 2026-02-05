@@ -1,9 +1,9 @@
 import type { FC } from 'react';
-import { motion } from 'framer-motion';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { TonConnectButton } from '@tonconnect/ui-react';
 import { Wallet, ChevronLeft, BarChart3 } from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
 import { formatCurrency } from '@/helpers/format';
+import { IconButton } from '@/components/ui';
 
 interface HeaderProps {
   balance?: number;
@@ -21,7 +21,6 @@ export const Header: FC<HeaderProps> = ({
   const navigate = useNavigate();
   const location = useLocation();
   
-  // Auto-detect if we should show back button based on location
   const isHome = location.pathname === '/';
   const shouldShowBack = showBackButton || !isHome;
   
@@ -35,43 +34,37 @@ export const Header: FC<HeaderProps> = ({
 
   return (
     <header className="sticky top-0 z-50 header-blur safe-top">
-      <div className="flex items-center justify-between px-4 py-3 max-w-md mx-auto">
+      <div className="flex items-center justify-between px-4 py-2.5 max-w-md mx-auto">
         {/* Left: Logo or Back */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 min-w-0">
           {shouldShowBack ? (
-            <motion.button 
+            <IconButton
+              icon={<ChevronLeft className="w-6 h-6 text-white" />}
+              aria-label="Назад"
               onClick={handleBack}
-              className="flex items-center justify-center -ml-2 p-1 active:opacity-60"
-              whileTap={{ scale: 0.95 }}
-            >
-              <ChevronLeft className="w-7 h-7 text-white" />
-            </motion.button>
+              size="md"
+            />
           ) : (
-            <motion.div 
-              className="bg-primary/10 p-1.5 rounded-lg border border-primary/20"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <BarChart3 className="w-[22px] h-[22px] text-[var(--tg-theme-button-color,#3390ec)]" />
-            </motion.div>
+            <div className="bg-primary/15 p-2 rounded-xl border border-primary/25 shrink-0">
+              <BarChart3 className="w-5 h-5 text-[var(--tg-theme-button-color,#3390ec)]" />
+            </div>
           )}
-          <h1 className="text-base font-semibold tracking-tight text-white">{title}</h1>
+          <h1 className="text-[15px] font-bold tracking-tight text-white truncate">
+            {title === 'Polygram' ? 'Полиграм' : title}
+          </h1>
         </div>
 
         {/* Right: Balance & Connect */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 shrink-0">
           {balance !== undefined && (
-            <motion.div 
-              className="bg-[var(--tg-theme-section-bg-color,#151b21)] border border-[var(--tg-theme-hint-color,#232A35)] rounded-full px-3 py-1.5 flex items-center gap-1.5"
-              whileHover={{ scale: 1.02 }}
-            >
-              <Wallet className="w-4 h-4 text-[var(--tg-theme-button-color,#3390ec)]" />
-              <span className="text-xs font-bold text-white tabular-nums">
-                {formatCurrency(balance)} TON
+            <div className="bg-white/[0.03] border border-white/10 rounded-xl px-2.5 py-1.5 flex items-center gap-1.5 backdrop-blur-md">
+              <Wallet className="w-3.5 h-3.5 text-[var(--tg-theme-button-color,#3390ec)]" />
+              <span className="text-[11px] font-black text-white tabular-nums">
+                {formatCurrency(balance)}
               </span>
-            </motion.div>
+            </div>
           )}
-          <div className="scale-90 origin-right">
+          <div className="scale-85 origin-right translate-x-1">
             <TonConnectButton />
           </div>
         </div>
