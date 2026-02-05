@@ -36,7 +36,7 @@ export function EnvUnsupported({ error }: { error?: unknown }) {
       
       <div style={{ marginTop: '20px', fontSize: '12px', opacity: 0.6, maxWidth: '300px', wordBreak: 'break-all' }}>
         <p>Host: {hostname}</p>
-        <p>Error: {error?.message || String(error) || 'Unknown error'}</p>
+        <p>Error: {error instanceof Error ? error.message : String(error) || 'Unknown error'}</p>
         <p>Time: {new Date().toLocaleTimeString()}</p>
       </div>
     </div>
